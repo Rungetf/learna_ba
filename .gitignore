@@ -15,5 +15,8 @@ thirdparty/miniconda/miniconda/
 # results
 results/*
 
+# cluster
+logs/
+
 # misc
 *__pycache__/

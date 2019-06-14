@@ -134,7 +134,7 @@ bohb = BOHB(
     ping_interval=600,
     working_directory=args.shared_directory,
 )
-res = bohb.run(n_iterations=args.n_iterations, min_n_workers=1)
+res = bohb.run(n_iterations=args.n_iterations, min_n_workers=5)
 
 
 # In a cluster environment, you usually want to store the results for later analysis.

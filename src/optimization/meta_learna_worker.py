@@ -22,12 +22,12 @@ class MetaLearnaWorker(Worker):
         self.num_cores = num_cores
         self.validation_timeout = validation_timeout
         self.train_sequences = parse_dot_brackets(
-            dataset="rfam_learn_train",
+            dataset="rfam_learn/train",
             data_dir=data_dir,
             target_structure_ids=train_sequences,
         )
         self.validation_sequences = parse_dot_brackets(
-            dataset="rfam_learn_validation",
+            dataset="rfam_learn/validation",
             data_dir=data_dir,
             target_structure_ids=range(1, 101),
         )

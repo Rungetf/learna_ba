@@ -21,7 +21,7 @@ class LearnaWorker(Worker):
         super().__init__(**kwargs)
         self.num_cores = num_cores
         self.train_sequences = parse_dot_brackets(
-            dataset="rfam_learn_validation",
+            dataset="rfam_learn/validation",
             data_dir=data_dir,
             target_structure_ids=train_sequences,
         )
