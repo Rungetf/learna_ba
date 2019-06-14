@@ -103,6 +103,8 @@ class LearnaWorker(Worker):
         evaluation_sum_of_min_distances = 0
         evaluation_sum_of_first_distances = 0
         evaluation_num_solved = 0
+        evaluation_sum_of_min_gc_deltas = 0
+        evaluation_sum_of_min_gc_deltas_and_distances = 0
 
         for r in evaluation_results:
             sequence_id = r[0].target_id
