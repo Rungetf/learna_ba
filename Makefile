@@ -46,6 +46,10 @@ clean-analysis:
 ## Remove thirdparty installs
 clean-thirdparty:
 	rm -rf thirdparty/miniconda/miniconda
+	cd thirdparty/mcts && make clean
+	cd thirdparty/rnainverse && make clean
+	cd thirdparty/antarna && make clean
+	cd thirdparty/eastman && make clean
 
 ################################################################################
 # Setup General
@@ -83,6 +87,12 @@ requirements:
 	./thirdparty/miniconda/make_miniconda.sh
 	conda env create -f environment.yml
 
+## Install all thirdparty requirements
+thirdparty-requirements:
+	cd thirdparty/mcts && make requirements
+	cd thirdparty/rnainverse && make requirements
+	cd thirdparty/antarna && make requirements
+	cd thirdparty/eastman && make requirements
 
 ################################################################################
 # Test Experiment and Example
