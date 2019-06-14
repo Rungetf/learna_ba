@@ -13,7 +13,7 @@ tar -xzf /work/ws/nemo/fr_ds371-learna-0/data/rfam_learn.tar.gz -C $TMPDIR/${MOA
 cp -r /work/ws/nemo/fr_ds371-learna-0/data/eterna $TMPDIR/${MOAB_JOBID}
 cp -r /work/ws/nemo/fr_ds371-learna-0/data/rfam_taneda $TMPDIR/${MOAB_JOBID}
 
-cd learna_new_codebase
+cd thesis 
 
 WORKSPACE=$(cat utils/workspace.txt)
 DATA_DIR="$TMPDIR/${MOAB_JOBID}"

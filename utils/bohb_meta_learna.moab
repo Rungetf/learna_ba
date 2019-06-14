@@ -23,7 +23,7 @@ echo $HPBJOBID
 mkdir $TMPDIR/${MOAB_JOBID}
 tar -xzvf /work/ws/nemo/fr_ds371-learna-0/data/rfam_learn.tar.gz -C $TMPDIR/${MOAB_JOBID}
 
-cd learna_new_codebase
+cd thesis 
 
 source thirdparty/miniconda/miniconda/bin/activate learna
 
