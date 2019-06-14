@@ -126,123 +126,31 @@ experiment-test:
 	# --gc_postprocessing \
 
 ################################################################################
-# Reproduce Results of LEARNA
+# Run experiments on Nemo cluster
 ################################################################################
 
 ## Reproduce LEARNA on <id> (1-100) of Eterna100
-reproduce-LEARNA-Eterna-%:
+nemo-test-%:
 	@source activate learna && \
 	python utils/timed_execution.py \
-		--timeout 86400 \
+		--timeout 60 \
 		--data_dir data/ \
 		--results_dir results/ \
-		--experiment_group reproduce_iclr_2019 \
-		--method LEARNA \
-		--dataset eterna \
-		--task_id $*
-
-## Reproduce LEARNA on <id> (1-29) of Rfam-Taneda
-reproduce-LEARNA-Rfam-Taneda-%:
-	@source activate learna && \
-	python utils/timed_execution.py \
-		--timeout 600 \
-		--data_dir data/ \
-		--results_dir results/ \
-		--experiment_group reproduce_iclr_2019 \
-		--method LEARNA \
+		--experiment_group thesis_test \
+		--method $* \
 		--dataset rfam_taneda \
-		--task_id $*
+		--task_id 1
 
-## Reproduce LEARNA-30min on <id> (1-100) of Rfam-Learn-Test
-reproduce-LEARNA-Rfam-Learn-Test-%:
-	@source activate learna && \
-	python utils/timed_execution.py \
-		--timeout 3600 \
-		--data_dir data/ \
-		--results_dir results/ \
-		--experiment_group reproduce_iclr_2019 \
-		--method LEARNA \
-		--dataset rfam_learn_test \
-		--task_id $*
+## Start experiment on the Rfam Taneda benchmark
+nemo-rfam-taneda-%:
+	msub utils/rna_single.moab \
+		-l walltime=1200 \
+		-t 1-1450 \
+		-v METHOD=$* \
+		-v DATASET=rfam_taneda \
+		-v TIMEOUT=600 \
+		-v EXPERIMENT_GROUP=thesis
 
-
-################################################################################
-# Reproduce Results of Meta-LEARNA
-################################################################################
-
-## Reproduce Meta-LEARNA on <id> (1-100) of Eterna100
-reproduce-Meta-LEARNA-Eterna-%:
-	@source activate learna && \
-	python utils/timed_execution.py \
-		--timeout 86400 \
-		--data_dir data/ \
-		--results_dir results/ \
-		--experiment_group reproduce_iclr_2019 \
-		--method Meta-LEARNA \
-		--dataset eterna \
-		--task_id $*
-
-## Reproduce Meta-LEARNA on <id> (1-29) of Rfam-Taneda
-reproduce-Meta-LEARNA-Rfam-Taneda-%:
-	@source activate learna && \
-	python utils/timed_execution.py \
-		--timeout 600 \
-		--data_dir data/ \
-		--results_dir results/ \
-		--experiment_group reproduce_iclr_2019 \
-		--method Meta-LEARNA \
-		--dataset rfam_taneda \
-		--task_id $*
-
-## Reproduce Meta-LEARNA on <id> (1-100) of Rfam-Learn-Test
-reproduce-Meta-LEARNA-Rfam-Learn-Test-%:
-	@source activate learna && \
-	python utils/timed_execution.py \
-		--timeout 3600 \
-		--data_dir data/ \
-		--results_dir results/ \
-		--experiment_group reproduce_iclr_2019 \
-		--method Meta-LEARNA \
-		--dataset rfam_learn_test \
-		--task_id $*
-
-################################################################################
-# Reproduce Results of Meta-LEARNA-Adapt
-################################################################################
-
-## Reproduce Meta-LEARNA-Adapt on <id> (1-100) of Eterna100
-reproduce-Meta-LEARNA-Adapt-Eterna-%:
-	@source activate learna && \
-	python utils/timed_execution.py \
-		--timeout 86400 \
-		--data_dir data/ \
-		--results_dir results/ \
-		--experiment_group reproduce_iclr_2019 \
-		--method Meta-LEARNA-Adapt \
-		--dataset eterna \
-		--task_id $*
-## Reproduce Meta-LEARNA-Adapt on <id> (1-29) of Rfam-Taneda
-reproduce-Meta-LEARNA-Adapt-Rfam-Taneda-%:
-	@source activate learna && \
-	python utils/timed_execution.py \
-		--timeout 600 \
-		--data_dir data/ \
-		--results_dir results/ \
-		--experiment_group reproduce_iclr_2019 \
-		--method Meta-LEARNA-Adapt \
-		--dataset rfam_taneda \
-		--task_id $*
-## Reproduce Meta-LEARNA-Adapt on <id> (1-100) of Rfam-Learn-Test
-reproduce-Meta-LEARNA-Adapt-Rfam-Learn-Test-%:
-	@source activate learna && \
-	python utils/timed_execution.py \
-		--timeout 3600 \
-		--data_dir data/ \
-		--results_dir results/ \
-		--experiment_group reproduce_iclr_2019 \
-		--method Meta-LEARNA-Adapt \
-		--dataset rfam_learn_test \
-		--task_id $*
 
 ################################################################################
 # Joint Architecture and Hyperparameter Search
