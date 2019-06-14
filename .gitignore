@@ -1,0 +1,17 @@
+# data
+data/eterna/*.rna
+data/rfam_learn_test/
+data/rfam_learn_validation/
+data/rfam_learn_train/
+
+# thirdparty
+thirdparty/antarna/src/
+thirdparty/mcts/src/
+thirdparty/eastman/src/
+thirdparty/eastman/best_model/
+thirdparty/eastman/solve_one_puzzle.py
+
+# results
+results/*
+
+*__pycache__/
