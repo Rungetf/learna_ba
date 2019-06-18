@@ -118,12 +118,11 @@ experiment-test:
   --restart_timeout 1800 \
   --target_structure_path data/eterna/2.rna \
 	--gc_improvement_step \
-	--desired_gc 0.1 \
-	--gc_weight 0.9 \
-	--structural_weight 0.1 \
+	--gc_reward \
+	--desired_gc 0.4 \
+	--gc_weight 1 \
+	--structural_weight 1 \
 	--timeout 600
-	# --gc_tolerance 0.04 \
-	# --gc_postprocessing \
 
 ################################################################################
 # Run experiments on Nemo cluster
