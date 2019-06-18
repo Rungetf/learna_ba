@@ -26,11 +26,11 @@ def _get_episode_finished(timeout, stop_once_solved):
         candidate_solution = env.design.primary
         last_reward = runner.episode_rewards[-1]
         last_fractional_hamming = env.episodes_info[-1].normalized_hamming_distance
-        last_gc_content = env.episodes_info[-1].gc_content
-        last_delta_gc = env.episodes_info[-1].delta_gc
+        # last_gc_content = env.episodes_info[-1].gc_content
+        # last_delta_gc = env.episodes_info[-1].delta_gc
         gc_satisfied = env.episodes_info[-1].gc_satisfied
         elapsed_time = time.time() - start_time
-        print(elapsed_time, last_reward, last_fractional_hamming, last_gc_content, last_delta_gc, gc_satisfied, candidate_solution)
+        print(elapsed_time, last_reward, last_fractional_hamming, gc_satisfied, candidate_solution)
 
         no_timeout = not timeout or elapsed_time < timeout
         stop_since_solved = stop_once_solved and last_reward == 1.0
@@ -168,6 +168,7 @@ if __name__ == "__main__":
     parser.add_argument("--desired_gc", default=0.5, type=float, help="The desired gc-content of the solution")
     parser.add_argument("--gc_improvement_step", action="store_true", help="Control the gc-content of the solution")
     parser.add_argument("--gc_postprocessing", action="store_true", help="Control gc-content only via postprocessing")
+    parser.add_argument("--gc_reward", action="store_true", help="Include gc-content into reward function")
     parser.add_argument("--gc_weight", default=1.0, type=float, help="The weighting factor for the gc-content constraint")
     parser.add_argument("--structural_weight", default=1.0, type=float, help="The weighting factor for the structural constraint")
 
@@ -200,6 +201,7 @@ if __name__ == "__main__":
         gc_postprocessing=args.gc_postprocessing,
         gc_weight=args.gc_weight,
         structural_weight=args.structural_weight,
+        gc_reward=args.gc_reward,
     )
     dot_brackets = parse_dot_brackets(
         dataset=args.dataset,
