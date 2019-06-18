@@ -149,6 +149,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--num_lstm_layers", type=int, default=0, help="Number of lstm layers"
     )
+    parser.add_argument("--gc_tolerance", default=0.04, type=float, help="The tolerance of the gc-content")
+    parser.add_argument("--desired_gc", default=0.5, type=float, help="The desired gc-content of the solution")
+    parser.add_argument("--gc_improvement_step", action="store_true", help="Control the gc-content of the solution")
+    parser.add_argument("--gc_postprocessing", action="store_true", help="Control gc-content only via postprocessing")
+    parser.add_argument("--gc_reward", action="store_true", help="Include gc-content into reward function")
+    parser.add_argument("--gc_weight", default=1.0, type=float, help="The weighting factor for the gc-content constraint")
+    parser.add_argument("--structural_weight", default=1.0, type=float, help="The weighting factor for the structural constraint")
+
 
     args = parser.parse_args()
 
@@ -166,6 +174,13 @@ if __name__ == "__main__":
         mutation_threshold=args.mutation_threshold,
         reward_exponent=args.reward_exponent,
         state_radius=args.state_radius,
+        gc_tolerance=args.gc_tolerance,
+        desired_gc=args.desired_gc,
+        gc_improvement_step=args.gc_improvement_step,
+        gc_postprocessing=args.gc_postprocessing,
+        gc_weight=args.gc_weight,
+        structural_weight=args.structural_weight,
+        gc_reward=args.gc_reward,
     )
     dot_brackets = parse_dot_brackets(
         dataset=args.dataset,
