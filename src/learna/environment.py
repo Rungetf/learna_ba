@@ -30,12 +30,13 @@ class RnaDesignEnvironmentConfig:
     state_radius: int = 5
     use_conv: bool = True
     use_embedding: bool = False
-    gc_improvement_step: bool = True
+    gc_improvement_step: bool = False
     gc_postprocessing: bool = False
     gc_tolerance: float = 0.04
     desired_gc: float = 0.5
     gc_weight: float = 1.0
     structural_weight: float = 1.0
+    gc_reward: bool = False
 
 
 def _string_difference_indices(s1, s2):
@@ -372,11 +373,12 @@ class EpisodeInfo:
     Information class.
     """
 
-    __slots__ = ["target_id", "time", "normalized_hamming_distance", "gc_content", "delta_gc", "gc_satisfied"]
+    __slots__ = ["target_id", "time", "normalized_hamming_distance", "gc_content", "agent_gc", "delta_gc", "gc_satisfied"]
     target_id: int
     time: float
     normalized_hamming_distance: float
     gc_content: float
+    agent_gc: float
     delta_gc: float
     gc_satisfied: bool
 
@@ -459,6 +461,8 @@ class RnaDesignEnvironment(Environment):
         if not terminal:
             return 0
 
+        agent_gc = 0 if self._constraint_controller.gc_satisfied(self.design) else self._constraint_controller.gc_diff_abs(self.design)
+
         hamming_distance = self._constraint_controller.hamming_distance(self.design, self.target)
 
         # print(f"Current design: {self.design.primary}")
@@ -469,7 +473,7 @@ class RnaDesignEnvironment(Environment):
             # improve for structural constraint
             self.design, hamming_distance = _local_improvement.structural_improvement_step()
             # improve for gc-content constraint
-            if not self._env_config.gc_postprocessing and self._env_config.gc_improvement_step:
+            if self._env_config.gc_improvement_step:
                 self.design = _local_improvement.gc_improvement_step(hamming_distance=hamming_distance)
 
         # apply gc_control as postprocessing step if hamming distance is 0
@@ -485,18 +489,19 @@ class RnaDesignEnvironment(Environment):
             time=time.time(),
             normalized_hamming_distance=normalized_hamming_distance,
             gc_content=self._constraint_controller.gc_content(self.design),
+            agent_gc=agent_gc,
             delta_gc=delta_gc,
             gc_satisfied=self._constraint_controller.gc_satisfied(self.design)
         )
         self.episodes_info.append(episode_info)
 
         # Jointly optimize for gc-content and structural constraint
-        if not self._env_config.gc_postprocessing and self._env_config.gc_improvement_step:
+        if self._env_config.gc_reward:
             return (1 - (self._env_config.structural_weight * normalized_hamming_distance) - (self._env_config.gc_weight * delta_gc)) ** self._env_config.reward_exponent
 
-        # If gc-content is not satisfied after postprocessing, the agent should try again, thus the reward is not 1.0
+        # If gc-content is not satisfied after postprocessing, the agent should try again, thus the reward is not 1 - gc_tolerance
         if self._env_config.gc_postprocessing and hamming_distance == 0 and not self._constraint_controller.gc_satisfied(self.design):
-            return (1 - (self._env_config.gc_weight * delta_gc)) ** self._env_config.reward_exponent
+            return (1 - self._env_config.gc_tolerance) ** self._env_config.reward_exponent
 
         return (1 - normalized_hamming_distance) ** self._env_config.reward_exponent
 
