@@ -16,6 +16,7 @@ from .environment import _encode_pairing
 from .environment import _Target
 from .environment import _Design
 from .environment import RnaDesignEnvironment
+from .environment import LocalImprovement
 
 from RNA import fold
 
@@ -1214,7 +1215,9 @@ def test_RnaDesignEnvironment_local_improvement():
     hamming_distance = hamming(environment.target.dot_bracket, fold(mutated.primary)[0])
     assert 0 < hamming_distance
     assert 4 == hamming_distance
-    assert 0 == environment._local_improvement(fold(mutated.primary)[0])
+
+    _local_improvement = LocalImprovement(environment.design, environment.target, environment._constraint_controller)
+    assert 0 == _local_improvement.structural_improvement_step()[1]
 
     mutated = environment.design.get_mutated("AA", [0, 1])
     assert "AAGAUAGC" == mutated.primary
@@ -1222,7 +1225,9 @@ def test_RnaDesignEnvironment_local_improvement():
     hamming_distance = hamming(environment.target.dot_bracket, fold(mutated.primary)[0])
     assert 0 < hamming_distance
     assert 4 == hamming_distance
-    assert 0 == environment._local_improvement(fold(mutated.primary)[0])
+
+    _local_improvement = LocalImprovement(environment.design, environment.target, environment._constraint_controller)
+    assert 0 == _local_improvement.structural_improvement_step()[1]
 
     mutated = environment.design.get_mutated("AAAAAAAA", [0, 1, 2, 3, 4, 5, 6, 7])
     assert "AAAAAAAA" == mutated.primary
@@ -1230,7 +1235,9 @@ def test_RnaDesignEnvironment_local_improvement():
     hamming_distance = hamming(environment.target.dot_bracket, fold(mutated.primary)[0])
     assert 0 < hamming_distance
     assert 4 == hamming_distance
-    assert 0 == environment._local_improvement(fold(mutated.primary)[0])
+
+    _local_improvement = LocalImprovement(environment.design, environment.target, environment._constraint_controller)
+    assert 0 == _local_improvement.structural_improvement_step()[1]
 
 
 def test_RnaDesignEnvironment_get_reward():
