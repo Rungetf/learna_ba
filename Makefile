@@ -148,7 +148,7 @@ nemo-rfam-taneda-%:
 		-v METHOD=$* \
 		-v DATASET=rfam_taneda \
 		-v TIMEOUT=600 \
-		-v EXPERIMENT_GROUP=thesis
+		-v EXPERIMENT_GROUP=thesis_baselines
 
 
 ################################################################################
