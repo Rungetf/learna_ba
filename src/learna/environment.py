@@ -103,11 +103,11 @@ class ConstraintControler(object):
         self._gc_tolerance = gc_tolerance
         self._desired_gc = desired_gc
 
-    def hamming_distance(self, design, target):
-        return hamming(fold(design.primary)[0], target.dot_bracket)
+    def hamming_distance(self, folded_design, target):
+        return hamming(folded_design, target.dot_bracket)
 
-    def normalized_hamming_distance(self, design, target):
-        return self.hamming_distance(design, target) / len(target)
+    def normalized_hamming_distance(self, folded_design, target):
+        return self.hamming_distance(folded_design, target.dot_bracket) / len(target)
 
     def gc_content(self, design):
         return (design.primary.upper().count('G') + design.primary.upper().count('C')) / len(design.primary)
@@ -461,11 +461,9 @@ class RnaDesignEnvironment(Environment):
         if not terminal:
             return 0
 
-        agent_gc = 0 if self._constraint_controller.gc_satisfied(self.design) else self._constraint_controller.gc_diff_abs(self.design)
+        agent_gc = self._constraint_controller.gc_diff(self.design)
 
-        hamming_distance = self._constraint_controller.hamming_distance(self.design, self.target)
-
-        # print(f"Current design: {self.design.primary}")
+        hamming_distance = self._constraint_controller.hamming_distance(fold(self.design)[0], self.target)
 
         # start local improvement procedure
         _local_improvement = LocalImprovement(self.design, self.target, self._constraint_controller)
@@ -480,8 +478,8 @@ class RnaDesignEnvironment(Environment):
         if hamming_distance == 0 and self._env_config.gc_postprocessing:
             self.design = _local_improvement.gc_improvement_step(hamming_distance=hamming_distance)
 
-        normalized_hamming_distance = self._constraint_controller.normalized_hamming_distance(self.design, self.target)
-        delta_gc = 0 if self._constraint_controller.gc_satisfied(self.design) else self._constraint_controller.gc_diff_abs(self.design)
+        normalized_hamming_distance = self._constraint_controller.normalized_hamming_distance(fold(self.design)[0], self.target)
+        delta_gc = self._constraint_controller.gc_diff_abs(self.design)
 
         # For hparam optimization
         episode_info = EpisodeInfo(
@@ -499,10 +497,11 @@ class RnaDesignEnvironment(Environment):
         if self._env_config.gc_reward:
             return (1 - (self._env_config.structural_weight * normalized_hamming_distance) - (self._env_config.gc_weight * delta_gc)) ** self._env_config.reward_exponent
 
-        # If gc-content is not satisfied after postprocessing, the agent should try again, thus the reward is not 1 - gc_tolerance
-        if self._env_config.gc_postprocessing and hamming_distance == 0 and not self._constraint_controller.gc_satisfied(self.design):
+        # TODO(): Utilize bool or something to handle stopping only if gc is chosen.
+        if hamming_distance == 0 and not self._constraint_controller.gc_satisfied(self.design):
             return (1 - self._env_config.gc_tolerance) ** self._env_config.reward_exponent
 
+        # Else return normalized hamming distance
         return (1 - normalized_hamming_distance) ** self._env_config.reward_exponent
 
     def execute(self, actions):
