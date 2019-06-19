@@ -16,5 +16,10 @@ source thirdparty/miniconda/miniconda/bin/activate learna
   --num_lstm_layers 1 \
   --reward_exponent 9.33503385734547 \
   --state_radius 32 \
+  --gc_improvement_step \
+	--gc_reward \
+	--desired_gc 0.1 \
+	--gc_weight 1 \
+	--structural_weight 1 \
   --target_structure_path $TARGET_STRUCTURE_PATH \
   --restart_timeout 1800
