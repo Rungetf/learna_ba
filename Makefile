@@ -119,8 +119,9 @@ experiment-test:
   --target_structure_path data/eterna/2.rna \
 	--gc_improvement_step \
 	--gc_reward \
-	--desired_gc 0.4 \
+	--desired_gc 0.1 \
 	--gc_weight 1 \
+	--gc_tolerance 0.01 \
 	--structural_weight 1 \
 	--timeout 600
 
