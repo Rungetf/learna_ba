@@ -20,6 +20,6 @@ source thirdparty/miniconda/miniconda/bin/activate learna
 	--gc_reward \
 	--desired_gc 0.1 \
 	--gc_weight 1 \
-	--structural_weight 1 \
+  --gc_tolerance 0.01 \
   --target_structure_path $TARGET_STRUCTURE_PATH \
   --restart_timeout 1800

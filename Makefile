@@ -122,8 +122,8 @@ experiment-test:
 	--desired_gc 0.1 \
 	--gc_weight 1 \
 	--gc_tolerance 0.01 \
-	--structural_weight 1 \
 	--timeout 600
+	# --learning_rate 0.0005991629320464973 \
 
 ################################################################################
 # Run experiments on Nemo cluster

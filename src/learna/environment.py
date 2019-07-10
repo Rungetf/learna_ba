@@ -31,11 +31,9 @@ class RnaDesignEnvironmentConfig:
     use_conv: bool = True
     use_embedding: bool = False
     gc_improvement_step: bool = False
-    gc_postprocessing: bool = False
     gc_tolerance: float = 0.04
     desired_gc: float = 0.5
     gc_weight: float = 1.0
-    structural_weight: float = 1.0
     gc_reward: bool = False
 
 
@@ -160,7 +158,6 @@ class LocalImprovement(object):
         single_sites = []
 
         if self._constraint_controller.gc_satisfied(self._design):
-            print("Entered gc_improvement gc_satisfied")
             return self._design
 
         # Start improvement by replacing nucleotides at paired sites
@@ -186,10 +183,8 @@ class LocalImprovement(object):
 
         # if gc constraint is not satisfied, iterate the single sites and improve gc-content
         if not self._constraint_controller.gc_satisfied(self._design):
-            print("Starting single site improvement")
             return self._gc_improve_single_sites(single_sites, hamming_distance=hamming_distance)
 
-        print("Success via paired sites!!")
         return self._design
 
     def _gc_improve_single_sites(self, single_sites, hamming_distance=0):
@@ -201,31 +196,27 @@ class LocalImprovement(object):
                 else:
                     self._decrease_gc(site, self._target.get_paired_site(site), hamming_distance)
             else:
-                print("gc_satisfied via single sites")
                 return self._design
-        print("gc NOT satisfied via single sites")
         return self._design
 
     def _increase_gc(self, site, paired_site=None, hamming_distance=0):
         primary = list(self._design.primary)
         if self._design.primary[site] == 'A':
-            primary[site] = np.random.choice(['G', 'C'])  # currently random choice, could be improved
+            primary[site] = 'G'  # choice could be improved
             if paired_site:
                 primary[site] = 'G'
                 primary[paired_site] = 'C'
             if hamming(fold(''.join(primary))[0], self._target.dot_bracket) == hamming_distance:
                 self._design.assign_sites(0, site, self._target.get_paired_site(site))
-                print(f"Changed nucleotide {site}")
             else:
                 return
         elif self._design.primary[site] == 'U':
-            primary[site] = np.random.choice(['G', 'C'])  # currently rnadom choice, could be improved
+            primary[site] = 'C'  # choice could be improved
             if paired_site:
                 primary[site] = 'C'
                 primary[paired_site] = 'G'
             if hamming(fold(''.join(primary))[0], self._target.dot_bracket) == hamming_distance:
                     self._design.assign_sites(1, site, self._target.get_paired_site(site))
-                    print(f"Changed nucleotide {site}")
             else:
                 return
 
@@ -233,23 +224,21 @@ class LocalImprovement(object):
     def _decrease_gc(self, site, paired_site=None, hamming_distance=0):
         primary = list(self._design.primary)
         if self._design.primary[site] == 'G':
-            primary[site] = np.random.choice(['A', 'U'])
+            primary[site] = 'A'
             if paired_site:
                 primary[site] = 'A'
                 primary[paired_site] = 'U'
             if hamming(fold(''.join(primary))[0], self._target.dot_bracket) == hamming_distance:
                 self._design.assign_sites(2, site, self._target.get_paired_site(site))
-                print(f"Changed nucleotide {site}")
             else:
                 return
         elif self._design.primary[site] == 'C':
-            primary[site] = np.random.choice(['A', 'U'])
+            primary[site] = 'U'
             if paired_site:
                 primary[site] = 'U'
                 primary[paired_site] = 'A'
             if hamming(fold(''.join(primary))[0], self._target.dot_bracket) == hamming_distance:
                     self._design.assign_sites(3, site, self._target.get_paired_site(site))
-                    print(f"Changed nucleotide {site}")
             else:
                 return
 
@@ -473,16 +462,15 @@ gc control
         # start local improvement procedure
         _local_improvement = LocalImprovement(self.design, self.target, self._constraint_controller)
         if 0 < hamming_distance < self._env_config.mutation_threshold:
-            # improve for structural constraint
+            # improve wrt structural constraints
             self.design, hamming_distance = _local_improvement.structural_improvement_step()
-            # improve for gc-content constraint
+            # improve wrt gc-content constraint
             if self._env_config.gc_improvement_step:
                 self.design = _local_improvement.gc_improvement_step(hamming_distance=hamming_distance)
-                print(f"(GIS) GC before: {agent_gc} GC after: {self._constraint_controller.gc_diff(self.design)}")
 
-        # apply gc_control as postprocessing step if hamming distance is 0
-        if hamming_distance == 0 and self._env_config.gc_postprocessing:
-            self.design = _local_improvement.gc_improvement_step(hamming_distance=hamming_distance)
+        # # apply gc_control as postprocessing step if hamming distance is 0
+        # if hamming_distance == 0 and self._env_config.gc_postprocessing:
+        #     self.design = _local_improvement.gc_improvement_step(hamming_distance=hamming_distance)
 
         normalized_hamming_distance = self._constraint_controller.normalized_hamming_distance(fold(self.design.primary)[0], self.target)
         delta_gc = self._constraint_controller.gc_diff_abs(self.design)
@@ -499,17 +487,14 @@ gc control
         )
         self.episodes_info.append(episode_info)
 
+        delta_gc = 0 if self._constraint_controller.gc_satisfied(self.design) else delta_gc
 
         if hamming_distance == 0 and self._constraint_controller.gc_satisfied(self.design):
             return 1.0
-        # Jointly optimize for gc-content and structural constraint
-        if self._env_config.gc_reward:
-            return (1 - (self._env_config.structural_weight * normalized_hamming_distance) - (self._env_config.gc_weight * delta_gc)) ** self._env_config.reward_exponent
 
-        # TODO(): Utilize bool or something to handle stopping only if gc is chosen.
-        if hamming_distance == 0 and not self._constraint_controller.gc_satisfied(self.design):
-            print("Entered hamming == 0 and not gc_satisfied!!")
-            return (1 - self._env_config.gc_tolerance) ** self._env_config.reward_exponent
+        # Jointly optimize for gc-content and structural constraint if gc content optimization desired
+        if self._env_config.gc_reward:
+            return (1 - min(normalized_hamming_distance + self._env_config.gc_weight * delta_gc, 1)) ** self._env_config.reward_exponent  # (1 - (normalized_hamming_distance + delta_gc) ** alpha worked, why?
 
         # Else return normalized hamming distance
         return (1 - normalized_hamming_distance) ** self._env_config.reward_exponent
