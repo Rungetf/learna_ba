@@ -175,9 +175,18 @@ bohb-example:
 ################################################################################
 
 ## Analyse experiment group %
-analyse:
+analyse-%:
 	@source activate learna && \
-	python -m src.analyse.analyse_experiment_group --experiment_group results/reproduce_iclr_2019 --analysis_dir analysis/reproduce_iclr_2019 --root_sequences_dir data --ci_alpha 0.05
+	python -m src.analyse.analyse_experiment_group --experiment_group resutls/$* --analysis_dir analysis/$* --root_sequences_dir data --ci_alpha 0.05
+
+## Analyse experiment group %
+analyse-nemo-%:
+        @source activate learna && \
+        python -m src.analyse.analyse_experiment_group \
+          --experiment_group /work/ws/nemo/fr_ds371-learna-0/results/$* \
+          --analysis_dir /work/ws/nemo/fr_ds371-learna-0/analysis/$* \
+          --root_sequences_dir /work/ws/nemo/fr_ds371-learna-0/data
+        cp -r /work/ws/nemo/fr_ds371-learna-0/analysis/$* analysis
 
 ## Plot reproduced results using pgfplots
 plots:
