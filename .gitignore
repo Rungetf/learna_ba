@@ -15,6 +15,9 @@ thirdparty/miniconda/miniconda/
 # results
 results/*
 
+# analysis
+analysis/*
+
 # cluster
 logs/
 

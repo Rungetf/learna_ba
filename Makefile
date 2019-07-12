@@ -125,6 +125,62 @@ experiment-test:
 	--timeout 600
 	# --learning_rate 0.0005991629320464973 \
 
+
+## Local Meta-LEARNA experiment with GC-control
+meta-learna-test:
+	@source activate learna && \
+	python -m src.learna.design_rna \
+	--mutation_threshold 5 \
+	--batch_size 123 \
+	--conv_sizes 11 3 \
+	--conv_channels 10 3 \
+	--embedding_size 2 \
+	--entropy_regularization 0.00015087352506343337 \
+	--fc_units 52 \
+	--learning_rate 6.442010833400271e-05 \
+	--lstm_units 3 \
+	--num_fc_layers 1 \
+	--num_lstm_layers 0 \
+	--reward_exponent 8.932893783628236 \
+	--state_radius 29 \
+	--gc_improvement_step \
+	--gc_reward \
+	--desired_gc 0.1 \
+	--gc_weight 1 \
+	--gc_tolerance 0.01 \
+	--target_structure_path data/eterna/2.rna \
+	--restore_path models/ICLR_2019/224_0_1 \
+	--stop_learning
+
+
+## Local Meta-LEARNA experiment with GC-control
+meta-learna-adapt-test:
+	@source activate learna && \
+	python -m src.learna.design_rna \
+	--mutation_threshold 5 \
+	--batch_size 123 \
+	--conv_sizes 11 3 \
+	--conv_channels 10 3 \
+	--embedding_size 2 \
+	--entropy_regularization 0.00015087352506343337 \
+	--fc_units 52 \
+	--learning_rate 6.442010833400271e-05 \
+	--lstm_units 3 \
+	--num_fc_layers 1 \
+	--num_lstm_layers 0 \
+	--reward_exponent 8.932893783628236 \
+	--state_radius 29 \
+	--gc_improvement_step \
+	--gc_reward \
+	--desired_gc 0.1 \
+	--gc_weight 1 \
+	--gc_tolerance 0.01 \
+	--target_structure_path data/eterna/2.rna \
+	--restore_path models/ICLR_2019/224_0_1 \
+	--restart_timeout 1800
+
+
+
 ################################################################################
 # Run experiments on Nemo cluster
 ################################################################################
@@ -181,21 +237,27 @@ analyse-%:
 
 ## Analyse experiment group %
 analyse-nemo-%:
-        @source activate learna && \
-        python -m src.analyse.analyse_experiment_group \
-          --experiment_group /work/ws/nemo/fr_ds371-learna-0/results/$* \
-          --analysis_dir /work/ws/nemo/fr_ds371-learna-0/analysis/$* \
-          --root_sequences_dir /work/ws/nemo/fr_ds371-learna-0/data
-        cp -r /work/ws/nemo/fr_ds371-learna-0/analysis/$* analysis
+	@source activate learna && \
+	python -m src.analyse.analyse_experiment_group \
+  	--experiment_group /work/ws/nemo/fr_ds371-learna-0/results/$* \
+  	--analysis_dir /work/ws/nemo/fr_ds371-learna-0/analysis/$* \
+  	--root_sequences_dir /work/ws/nemo/fr_ds371-learna-0/data
+		cp -r /work/ws/nemo/fr_ds371-learna-0/analysis/$* analysis
 
 ## Plot reproduced results using pgfplots
-plots:
+plots-%:
+	mkdir -p results
+	rm -f results/plots.tex
+	> results/plots.tex
+	@source activate learna && \
+	python -m src.analyse.plot --experiment_group analysis/$* --results_dir results/
 	rm -rf results/plots/
 	@source activate learna && \
 	pdflatex -synctex=1 -interaction=nonstopmode -shell-escape results/plots.tex
 	mkdir -p results/plots/
-	mv pgfplots.pdf results/plots/
-	rm -f pgfplots*
+	mv plots.pdf results/plots/
+	rm -f plots*
+	okular results/plots/plots.pdf &
 
 
 

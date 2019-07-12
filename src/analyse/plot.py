@@ -32,6 +32,7 @@ class Results(object):
 
     def _write_performance_data(self, dataset, min_data, ci_data):
         subsection = "\\subsection" + "{" + dataset[0].upper() + dataset[1:] + "}\n"
+        subsection = subsection.replace("_", "-")
         with open(self._results_dir / 'plots.tex', 'a') as plotting_file:
             plotting_file.write("\\section{Performance}\n" + subsection)
 
