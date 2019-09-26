@@ -1,0 +1,22 @@
+#! /bin/bash
+
+#MSUB -E
+#MSUB -e logs/${MOAB_JOBID}.e
+#MSUB -o logs/${MOAB_JOBID}.o
+#MSUB -l nodes=1:ppn=1,walltime=4:00:00:00
+#MSUB -t [1-3115]
+
+cd thesis
+
+WORKSPACE=$(cat utils/workspace.txt)
+DATA_DIR="${WORKSPACE}/data/rfam_raw"
+OUT_DIR="${WORKSPACE}/data/rfam_14_interim"
+
+mkdir -p $OUT_DIR
+
+source thirdparty/miniconda/miniconda/bin/activate learna
+
+python -m src.data.generate_rfam_interim \
+  --data $DATA_DIR \
+  --out_dir $OUT_DIR \
+  --family $MOAB_JOBARRAYINDEX

@@ -18,7 +18,7 @@ source thirdparty/miniconda/miniconda/bin/activate learna
   --state_radius 29 \
   --gc_improvement_step \
   --gc_reward \
-  --desired_gc 0.6 \
+  --desired_gc 0.1 \
   --gc_weight 1 \
   --gc_tolerance 0.01 \
   --target_structure_path $TARGET_STRUCTURE_PATH \

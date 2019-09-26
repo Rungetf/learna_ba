@@ -1,0 +1,15 @@
+#! /bin/bash
+
+#MSUB -E
+#MSUB -e logs/${MOAB_JOBID}.e
+#MSUB -o logs/${MOAB_JOBID}.o
+#MSUB -l nodes=1:ppn=9,walltime=0:03:00:00
+#MSUB -t [1-9]
+
+cd thesis
+
+source thirdparty/miniconda/miniconda/bin/activate learna
+
+python -m src.analyse.analyse_experiment_group --experiment_group /work/ws/nemo/fr_ds371-learna-0/results/thesis_new_output_gc_0${MOAB_JOBARRAYINDEX} --analysis_dir /work/ws/nemo/fr_ds371-learna-0/analysis/thesis_new_output_gc_0${MOAB_JOBARRAYINDEX} --root_sequences_dir /work/ws/nemo/fr_ds371-learna-0/data
+
+cp -r /work/ws/nemo/fr_ds371-learna-0/analysis/thesis_new_output_gc_0${MOAB_JOBARRAYINDEX} analysis/thesis_new_output_gc_0${MOAB_JOBARRAYINDEX}
