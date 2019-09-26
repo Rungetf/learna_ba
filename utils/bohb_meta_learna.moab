@@ -24,7 +24,7 @@ mkdir $TMPDIR/${MOAB_JOBID}
 tar -xzf /work/ws/nemo/fr_ds371-learna-0/data/rfam_local_train.tar.gz -C $TMPDIR/${MOAB_JOBID}
 tar -xzf /work/ws/nemo/fr_ds371-learna-0/data/rfam_local_validation.tar.gz -C $TMPDIR/${MOAB_JOBID}
 
-cd thesis
+cd learna_ba
 
 source thirdparty/miniconda/miniconda/bin/activate learna
 

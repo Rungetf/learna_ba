@@ -74,7 +74,7 @@ os.makedirs(args.shared_directory, exist_ok=True)
 if args.mode == "learna":
     worker_cls = LearnaWorker
     worker_args = dict(
-        data_dir=args.data_dir, num_cores=args.n_cores, train_sequences=range(1, 100)
+        data_dir=args.data_dir, num_cores=args.n_cores, train_sequences=range(1, 101)
     )
 
 if args.mode == "meta_learna":

@@ -6,7 +6,7 @@
 #MSUB -l nodes=1:ppn=1,walltime=4:00:00:00
 #MSUB -t [1-3115]
 
-cd thesis
+cd learna_ba
 
 WORKSPACE=$(cat utils/workspace.txt)
 DATA_DIR="${WORKSPACE}/data/rfam_raw"

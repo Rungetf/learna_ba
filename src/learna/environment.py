@@ -494,42 +494,29 @@ gc control
 
         # reward formulation for RNA local Design, excluding local improvement steps and gc content!!!!
         if self._env_config.local_design:
-            # replace sequence parts of candidate solution from sequence of target according to env_config
-            # self.design = self.design.replace_subsequences(self.target, self._env_config.keep_sequences)
-
             distance = 0
             folding = fold(self.design.primary)[0]
-            # print(f"current target: {self.target.local_target}")
-            # print(f"target length: {len(self.target.local_target)}")
             sequence_parts, folding_parts = self.target.get_sequence_parts()  # return tuple of <sequence start, sequence end>
-            # print(sequence_parts)
-            # print(folding_parts)
 
             if not self._env_config.sequence_reward:
                 design = [c for c in self.design.primary]
                 for start, end in sequence_parts:
                     design[start:end] = self.target.local_target[start:end]
                 self.design = _Design(primary=''.join(design))
-                # print(design)
-                # print(self.target.local_target)
-                # print(folding)
                 folding = fold(self.design.primary)[0]
 
             for start, end in folding_parts:
-                # print('structure parts')
-                distance +=  hamming(folding[start:end], self.target.local_target[start:end]) # self._constraint_controler.hamming_distance(fold(self.design.primary)[0][start:end], self.target.local_target[start:end])
-                print(f"target: {self.target.local_target[start:end]}")
-                print(f"design: {folding[start:end]}")
-                # print(f"distance structure: {distance}")
+                distance +=  hamming(folding[start:end], self.target.local_target[start:end])
                 if not self._env_config.sequence_reward:
                     normalized_distance = (distance / len(self.target))
-                    # print(f"normalized distance {normalized_distance}")
+
                     episode_info = EpisodeInfo(
                     target_id=self.target.id,
                     time=time.time(),
                     normalized_hamming_distance=normalized_distance,
                     )
                     self.episodes_info.append(episode_info)
+
                     if distance == 0:
                         return 1.0
 
@@ -539,14 +526,10 @@ gc control
 
             if self._env_config.sequence_reward:
                 for start, end in sequence_parts:
-                    distance += hamming(self.design.primary[start:end], self.target.local_target[start:end])  # self._constraint_controller.hamming_distance(self.design.primary[start:end], self.target.local_target[start:end])
-                    # print('sequence parts')
-                    # print(f"target: {self.target.local_target[start:end]}")
-                    # print(f"design: {self.design.primary[start:end]}")
+                    distance += hamming(self.design.primary[start:end], self.target.local_target[start:end])
 
-            # print(f"distance sequence and structure: {distance}")
             normalized_distance = (distance / len(self.target))
-            # print(f"normalized distance {normalized_distance}")
+
             episode_info = EpisodeInfo(
                 target_id=self.target.id,
                 time=time.time(),
@@ -558,57 +541,6 @@ gc control
             if distance == 0:
                 return 1.0
             return (1 - normalized_distance) ** self._env_config.reward_exponent
-
-
-
-        # agent_gc = self._constraint_controller.gc_content(self.design)
-
-        # hamming_distance = self._constraint_controller.hamming_distance(fold(self.design.primary)[0], self.target)
-
-        # # start local improvement procedure
-        # local_improvement = LocalImprovement(self.design, self.target, self._constraint_controller)
-        # if 0 < hamming_distance < self._env_config.mutation_threshold:
-        #     # improve wrt structural constraints
-        #     self.design, hamming_distance = local_improvement.structural_improvement_step()
-        #     # improve wrt gc-content constraint
-        #     if self._env_config.gc_improvement_step:
-        #         self.design = local_improvement.gc_improvement_step(hamming_distance=hamming_distance)
-
-        # # apply gc_control as postprocessing step if hamming distance is 0
-        # if hamming_distance == 0 and self._env_config.gc_postprocessing:
-        #     self.design = local_improvement.gc_improvement_step(hamming_distance=hamming_distance)
-
-        # normalized_hamming_distance = self._constraint_controller.normalized_hamming_distance(fold(self.design.primary)[0], self.target)
-        # delta_gc = self._constraint_controller.gc_diff_abs(self.design)
-
-        # For hparam optimization
-        # episode_info = EpisodeInfo(
-        #     target_id=self.target.id,
-        #     time=time.time(),
-        #     normalized_hamming_distance=normalized distance,
-        #     # gc_content=self._constraint_controller.gc_content(self.design),
-        #     # agent_gc=agent_gc,
-        #     # delta_gc=delta_gc,
-        #     # gc_satisfied=self._constraint_controller.gc_satisfied(self.design)
-        # )
-        # self.episodes_info.append(episode_info)
-
-        # delta_gc = 0 if self._constraint_controller.gc_satisfied(self.design) else delta_gc
-
-        # if self._local_design:
-        #     return
-
-        # Jointly reward gc-content and structural constraint if gc content optimization desired
-        # if self._env_config.gc_reward:
-        #     if hamming_distance == 0 and delta_gc == 0:
-        #         return 1.0
-
-        #     return (1 - min(normalized_hamming_distance + self._env_config.gc_weight * delta_gc, 1)) ** self._env_config.reward_exponent  # (1 - (normalized_hamming_distance + delta_gc) ** alpha worked, why?
-
-        # Else return normalized hamming distance based reward
-        # if hamming_distance == 0:
-        #     return 1.0
-        # return (1 - normalized_hamming_distance) ** self._env_config.reward_exponent
 
     def execute(self, actions):
         """

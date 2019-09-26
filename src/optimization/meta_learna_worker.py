@@ -49,7 +49,7 @@ class MetaLearnaWorker(Worker):
             self.validation_sequences = parse_local_design_data(
                 dataset=Path(self._data_dir, "rfam_local_validation").stem,
                 data_dir=self._data_dir,
-                target_structure_ids=range(1, 100),
+                target_structure_ids=range(1, 101),
             )
         else:
             self.train_sequences = parse_dot_brackets(
@@ -60,7 +60,7 @@ class MetaLearnaWorker(Worker):
             self.validation_sequences = parse_dot_brackets(
                 dataset="rfam_learn/validation",
                 data_dir=self._data_dir,
-                target_structure_ids=range(1, 100),
+                target_structure_ids=range(1, 101),
             )
 
         network_config = NetworkConfig(

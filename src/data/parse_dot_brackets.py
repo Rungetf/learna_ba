@@ -37,18 +37,7 @@ def parse_local_design_data(
     path = Path
     df = pd.read_csv(Path(data_dir, dataset, f"{str(dataset).split('_')[-1]}.interim"), sep='\t')
     if target_structure_ids:
-        # return list(map(tuple, df.iloc[[int(id) for id in target_structure_ids]][['structure', 'sequence', 'local_random', 'local_motif', 'gc_content', 'mfe']].itertuples(index=False, name=None)))
-        # for row in zip(df.iloc[[int(id) for id in target_structure_ids]]['structure'], df.iloc[[int(id) for id in target_structure_ids]]['sequence'], df.iloc[[int(id) for id in target_structure_ids]]['local_random'], df.iloc[[int(id) for id in target_structure_ids]]['local_motif'], df.iloc[[int(id) for id in target_structure_ids]]['gc_content'], df.iloc[[int(id) for id in target_structure_ids]]['mfe']):
-        #     print(row[0])
-        #     print(row[1])
-        #     print(row[2])
-        #     print(row[3])
-        #     print(row[4])
-        #     print(row[5])
-        for id in target_structure_ids:
-            df.iloc[int(id)]
-
-        return [(index+1, row[0], row[1], row[2], row[3], row[4], row[5]) for index, row in enumerate(zip(df.iloc[[int(id) for id in target_structure_ids]]['structure'], df.iloc[[int(id) for id in target_structure_ids]]['sequence'], df.iloc[[int(id) for id in target_structure_ids]]['local_random'], df.iloc[[int(id) for id in target_structure_ids]]['local_motif'], df.iloc[[int(id) for id in target_structure_ids]]['gc_content'], df.iloc[[int(id) for id in target_structure_ids]]['mfe']))]
+        return [(index+1, row[0], row[1], row[2], row[3], row[4], row[5]) for index, row in enumerate(zip(df.iloc[[int(id)-1 for id in target_structure_ids]]['structure'], df.iloc[[int(id)-1 for id in target_structure_ids]]['sequence'], df.iloc[[int(id)-1 for id in target_structure_ids]]['local_random'], df.iloc[[int(id)-1 for id in target_structure_ids]]['local_motif'], df.iloc[[int(id)-1 for id in target_structure_ids]]['gc_content'], df.iloc[[int(id)-1 for id in target_structure_ids]]['mfe']))]
     elif target_structure_path:
         return [tuple(Path(target_structure_path).read_text().rstrip().split())]
     else:
