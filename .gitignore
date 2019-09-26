@@ -8,6 +8,7 @@ data/rfam_processed/
 data/rfam_interim/
 data/test/
 data/rfam_raw/
+data/rfam_local_*.tar.gz
 
 # thirdparty
 thirdparty/antarna/src/
