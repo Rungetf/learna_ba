@@ -118,24 +118,23 @@ thirdparty-requirements:
 
 ## Local experiment testing
 experiment-test:
-	mkdir -p ../../test_results/eterna/LEARNA/run-plot/
 	@source activate learna && \
 	python -m src.learna.design_rna \
 	--mutation_threshold 5 \
-  --batch_size 126 \
-  --conv_sizes 17 5 \
-  --conv_channels 7 18 \
-  --embedding_size 3 \
-  --entropy_regularization 6.762991409135427e-05 \
-  --fc_units 57 \
-  --learning_rate 0.001 \
-  --lstm_units 28 \
-  --num_fc_layers 1 \
-  --num_lstm_layers 1 \
-  --reward_exponent 9.33503385734547 \
-  --state_radius 32 \
-  --restart_timeout 1800 \
-	--dataset rfam_local_train \
+	--batch_size 126 \
+	--conv_sizes 17 5 \
+	--conv_channels 7 18 \
+	--embedding_size 3 \
+ 	--entropy_regularization 6.762991409135427e-05 \
+  	--fc_units 57 \
+  	--learning_rate 0.001 \
+  	--lstm_units 28 \
+  	--num_fc_layers 1 \
+  	--num_lstm_layers 1 \
+  	--reward_exponent 9.33503385734547 \
+  	--state_radius 32 \
+  	--restart_timeout 1800 \
+	--dataset rfam_local_test \
 	--data_dir data \
 	--target_structure_ids 100 \
 	--local_design \
@@ -255,7 +254,7 @@ bohb-example:
 		--data_dir data \
 		--nic_name lo \
 		--shared_directory results/ \
-		--mode meta_learna
+		--mode learna
 
 ################################################################################
 # Analysis and Visualization

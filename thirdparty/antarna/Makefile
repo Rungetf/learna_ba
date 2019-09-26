@@ -29,7 +29,7 @@ requirements: requirements-conda requirements-python requirements-vienna
 
 ## Create Conda Environment for antaRNA
 requirements-conda:
-	conda create --no-default-packages -y --name antarna python=2.7.3
+	conda create --no-default-packages -y --name antarna python=2.7
 
 
 ## Install all requirements and download antaRNA source
