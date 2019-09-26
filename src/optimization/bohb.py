@@ -74,7 +74,7 @@ os.makedirs(args.shared_directory, exist_ok=True)
 if args.mode == "learna":
     worker_cls = LearnaWorker
     worker_args = dict(
-        data_dir=args.data_dir, num_cores=args.n_cores, train_sequences=range(1, 100, 3)
+        data_dir=args.data_dir, num_cores=args.n_cores, train_sequences=range(1, 100)
     )
 
 if args.mode == "meta_learna":
@@ -82,7 +82,7 @@ if args.mode == "meta_learna":
     worker_args = dict(
         data_dir=args.data_dir,
         num_cores=args.n_cores,
-        train_sequences=range(1, 65000),
+        train_sequences=range(1, 100000),
         validation_timeout=60,
     )
 
@@ -134,7 +134,7 @@ bohb = BOHB(
     ping_interval=600,
     working_directory=args.shared_directory,
 )
-res = bohb.run(n_iterations=args.n_iterations, min_n_workers=5)
+res = bohb.run(n_iterations=args.n_iterations, min_n_workers=1)
 
 
 # In a cluster environment, you usually want to store the results for later analysis.

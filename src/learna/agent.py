@@ -42,7 +42,7 @@ def get_network(network_config):
     embedding = [
         dict(
             type="embedding",
-            indices=4,
+            indices=8,
             size=network_config.embedding_size,
             l2_regularization=0.0,
             l1_regularization=0.0,

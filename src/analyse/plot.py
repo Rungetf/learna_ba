@@ -9,6 +9,7 @@ class Results(object):
         self._dataset_methods = {}
         for dataset in self._datasets:
             self._dataset_methods[dataset] = self._experiment_group.glob(f"{dataset}/*/")
+        self._colors = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
 
     def _read_data(self, dataset, file_type):
         return [path.resolve() for path in self._experiment_group.glob(f"**/{file_type}.tsv") if path.parent.parent.stem == dataset]
@@ -31,10 +32,11 @@ class Results(object):
             )
 
     def _write_performance_data(self, dataset, min_data, ci_data):
-        subsection = "\\subsection" + "{" + dataset[0].upper() + dataset[1:] + "}\n"
+        # subsection = "\\subsection" + "{" + dataset[0].upper() + dataset[1:] + "}\n"
+        subsection = "\\subsection*" + "{" + dataset[0].upper() + dataset[1:] + "-" + str(self._experiment_group)[-5:] + "}\n"
         subsection = subsection.replace("_", "-")
         with open(self._results_dir / 'plots.tex', 'a') as plotting_file:
-            plotting_file.write("\\section{Performance}\n" + subsection)
+            plotting_file.write("\\section*{Performance}\n" + subsection)
 
         self._write_tikz_env_start(dataset)
         exists_ci_data = bool([method.stem for method in self._dataset_methods[dataset] if method.stem in [path.parent.stem for path in ci_data]])
@@ -85,7 +87,7 @@ class Results(object):
                 "    xlabel={Time [seconds]},\n"
                 "    ylabel={Solved Sequences [\\%]},\n"
                 "    ymin=0, ymax=100,\n"
-                "    xmin=1, xmax=100000,\n"
+                "    xmin=1, xmax=1000,\n"
                 "    legend cell align=left,\n"
                 "    legend pos= outer north east,\n"
                 "    axis line style = thick\n"
@@ -116,15 +118,13 @@ class Results(object):
             "% ________________________________________________________________________________________\n"
             "% Head/Footmatter\n"
             "% ________________________________________________________________________________________\n"
-            "\\title{Learning to Design RNA -- Reproduce}\n"
+            "\\title{GC-Control for RNA Design}\n"
             "\n"
-            "\\author{Frederic Runge%\\thanks{Frederic Runge and Danny Stoll contributed equally to this work; order determined by coinflip.}\n"
-            ", Danny Stoll%\\footnotemark[1]\n"
-            ", Stefan Falkner\n"
-            "\& Frank Hutter \\\\\n"
+            "\\author{Frederic Runge \\\\\n"
+            "Bachelor Thesis \\\\\n"
             "Department of Computer Science \\\\\n"
             "University of Freiburg \\\\\n"
-            "\\texttt{\\{runget,stolld,sfalkner,fh\}@cs.uni-freiburg.de}}\n"
+            "\\texttt{runget@cs.uni-freiburg.de}}\n"
             "\n"
             "\\newcommand{\\fix}{\marginpar{FIX}}\n"
             "\\newcommand{\\new}{\marginpar{NEW}}\n"

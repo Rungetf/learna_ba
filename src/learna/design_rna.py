@@ -25,12 +25,13 @@ def _get_episode_finished(timeout, stop_once_solved):
 
         candidate_solution = env.design.primary
         last_reward = runner.episode_rewards[-1]
-        last_fractional_hamming = env.episodes_info[-1].normalized_hamming_distance
-        last_gc_content = env.episodes_info[-1].gc_content
-        # last_delta_gc = env.episodes_info[-1].delta_gc
-        gc_satisfied = env.episodes_info[-1].gc_satisfied
+        # last_fractional_hamming = env.episodes_info[-1].normalized_hamming_distance
+        # last_gc_content = env.episodes_info[-1].gc_content
+        # agent_gc = env.episodes_info[-1].agent_gc
+        # gc_satisfied = env.episodes_info[-1].gc_satisfied
         elapsed_time = time.time() - start_time
-        print(elapsed_time, last_reward, last_fractional_hamming, gc_satisfied, last_gc_content, candidate_solution)
+        # print(elapsed_time, last_reward, last_fractional_hamming, gc_satisfied, last_gc_content, agent_gc, candidate_solution)
+        print(elapsed_time, last_reward, candidate_solution)
 
         no_timeout = not timeout or elapsed_time < timeout
         stop_since_solved = stop_once_solved and last_reward == 1.0
@@ -102,7 +103,7 @@ def design_rna(
 if __name__ == "__main__":
     import argparse
     from pathlib import Path
-    from ..data.parse_dot_brackets import parse_dot_brackets
+    from ..data.parse_dot_brackets import parse_dot_brackets, parse_local_design_data
 
     parser = argparse.ArgumentParser()
 
@@ -164,12 +165,16 @@ if __name__ == "__main__":
     parser.add_argument("--lstm_units", type=int, help="The number of lstm units")
     parser.add_argument("--num_lstm_layers", type=int, help="The number of lstm layers")
     parser.add_argument("--embedding_size", type=int, help="The size of the embedding")
-    parser.add_argument("--gc_tolerance", default=0.04, type=float, help="The tolerance of the gc-content")
-    parser.add_argument("--desired_gc", default=0.5, type=float, help="The desired gc-content of the solution")
-    parser.add_argument("--gc_improvement_step", action="store_true", help="Control the gc-content of the solution")
-    parser.add_argument("--gc_reward", action="store_true", help="Include gc-content into reward function")
-    parser.add_argument("--gc_weight", default=1.0, type=float, help="The weighting factor for the gc-content constraint")
-
+    # parser.add_argument("--gc_tolerance", default=0.04, type=float, help="The tolerance of the gc-content")
+    # parser.add_argument("--desired_gc", default=0.5, type=float, help="The desired gc-content of the solution")
+    # parser.add_argument("--gc_improvement_step", action="store_true", help="Control the gc-content of the solution")
+    # parser.add_argument("--gc_reward", action="store_true", help="Include gc-content into reward function")
+    # parser.add_argument("--gc_weight", default=1.0, type=float, help="The weighting factor for the gc-content constraint")
+    # parser.add_argument("--num_actions", default=4, type=int, help="The number of actions that the agent chooses from")
+    # parser.add_argument("--keep_sequence", default="fully", type=str, help="How much of the sequence of targets for local design is kept: fully, partially, no")
+    parser.add_argument("--sequence_reward", action="store_true", help="Decide if hamming distance is computed based on the folding only or also on the sequence parts")
+    # parser.add_argument("--training_data", default="random", type=str, help="Choose the training data for local design: random sequences, motif based sequences")
+    parser.add_argument("--local_design", action="store_true", help="Choose if agent should do RNA local Design")
 
 
     args = parser.parse_args()
@@ -193,11 +198,16 @@ if __name__ == "__main__":
         mutation_threshold=args.mutation_threshold,
         reward_exponent=args.reward_exponent,
         state_radius=args.state_radius,
-        gc_tolerance=args.gc_tolerance,
-        desired_gc=args.desired_gc,
-        gc_improvement_step=args.gc_improvement_step,
-        gc_weight=args.gc_weight,
-        gc_reward=args.gc_reward,
+        # gc_tolerance=args.gc_tolerance,
+        # desired_gc=args.desired_gc,
+        # gc_improvement_step=args.gc_improvement_step,
+        # gc_weight=args.gc_weight,
+        # gc_reward=args.gc_reward,
+        local_design=args.local_design,
+        # num_actions=args.num_actions,
+        # keep_sequence=args.keep_sequence,
+        sequence_reward=args.sequence_reward,
+        # training_data=args.training_data,
     )
     dot_brackets = parse_dot_brackets(
         dataset=args.dataset,
@@ -205,6 +215,13 @@ if __name__ == "__main__":
         target_structure_ids=args.target_structure_ids,
         target_structure_path=args.target_structure_path,
     )
+    if args.local_design:
+        dot_brackets = parse_local_design_data(
+            dataset=args.dataset,
+            data_dir=args.data_dir,
+            target_structure_ids=args.target_structure_ids,
+            target_structure_path=args.target_structure_path,
+        )
 
     design_rna(
         dot_brackets,

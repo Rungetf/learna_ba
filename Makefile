@@ -55,6 +55,24 @@ clean-thirdparty:
 # Setup General
 ################################################################################
 
+## Download current rfam-database
+download-rfam:
+	./utils/data/download_rfam_database.sh
+
+## Generate Rfam-interim dataset
+rfam-interim:
+	@source activate learna && \
+	python -m src.data.generate_rfam_interim --family 6
+
+rfam-local-dataset:
+	@source activate learna && \
+	python -m src.data.generate_rfam_dataset --unique --local_random --name rfam_learn_local_min_10 --minimum_length 10
+
+split-local-data:
+	@source activate learna && \
+	python -m src.data.interim_to_single_files
+
+
 ## Download and prepare all datasets
 data: data-eterna data-rfam-taneda data-rfam-learn
 
@@ -100,6 +118,7 @@ thirdparty-requirements:
 
 ## Local experiment testing
 experiment-test:
+	mkdir -p ../../test_results/eterna/LEARNA/run-plot/
 	@source activate learna && \
 	python -m src.learna.design_rna \
 	--mutation_threshold 5 \
@@ -109,25 +128,36 @@ experiment-test:
   --embedding_size 3 \
   --entropy_regularization 6.762991409135427e-05 \
   --fc_units 57 \
-  --learning_rate 0.0005991629320464973 \
+  --learning_rate 0.001 \
   --lstm_units 28 \
   --num_fc_layers 1 \
   --num_lstm_layers 1 \
   --reward_exponent 9.33503385734547 \
   --state_radius 32 \
   --restart_timeout 1800 \
-  --target_structure_path data/eterna/2.rna \
-	--gc_improvement_step \
-	--gc_reward \
-	--desired_gc 0.1 \
-	--gc_weight 1 \
-	--gc_tolerance 0.01 \
-	--timeout 600
+	--dataset rfam_local_train \
+	--data_dir data \
+	--target_structure_ids 100 \
+	--local_design \
+	--timeout 1800
+	# --keep_sequence fully \
+	# --training_data random \
+	# --num_actions 4 \
+	# --sequence_reward \
+	# --learning_rate 0.0005991629320464973 \
+	# --target_structure_path data/rfam_local_test/1.rna \
+	# --gc_improvement_step \
+	# --gc_reward \
+	# --desired_gc 0.1 \
+	# --gc_weight 1 \
+	# --gc_tolerance 0.01 \
+	# > ../../test_results/eterna/LEARNA/run-plot/2_plot_run_gc_01.out
 	# --learning_rate 0.0005991629320464973 \
 
 
 ## Local Meta-LEARNA experiment with GC-control
 meta-learna-test:
+	mkdir -p ../../test_results/eterna/Meta-LEARNA/run-plot/
 	@source activate learna && \
 	python -m src.learna.design_rna \
 	--mutation_threshold 5 \
@@ -150,11 +180,12 @@ meta-learna-test:
 	--gc_tolerance 0.01 \
 	--target_structure_path data/eterna/2.rna \
 	--restore_path models/ICLR_2019/224_0_1 \
-	--stop_learning
+	--stop_learning > ../../test_results/eterna/Meta-LEARNA/run-plot/2_plot_run_gc_01.out
 
 
 ## Local Meta-LEARNA experiment with GC-control
 meta-learna-adapt-test:
+	mkdir -p ../../test_results/eterna/Meta-LEARNA-Adapt/run-plot/
 	@source activate learna && \
 	python -m src.learna.design_rna \
 	--mutation_threshold 5 \
@@ -177,7 +208,7 @@ meta-learna-adapt-test:
 	--gc_tolerance 0.01 \
 	--target_structure_path data/eterna/2.rna \
 	--restore_path models/ICLR_2019/224_0_1 \
-	--restart_timeout 1800
+	--restart_timeout 1800 > ../../test_results/eterna/Meta-LEARNA-Adapt/run-plot/2_plot_run_gc_01.out
 
 
 
@@ -205,7 +236,7 @@ nemo-rfam-taneda-%:
 		-v METHOD=$* \
 		-v DATASET=rfam_taneda \
 		-v TIMEOUT=600 \
-		-v EXPERIMENT_GROUP=thesis_LEARNA_gc_04
+		-v EXPERIMENT_GROUP=thesis_LEARNA_gc_01
 
 
 ################################################################################
@@ -231,12 +262,12 @@ bohb-example:
 ################################################################################
 
 ## Analyse experiment group %
-analyse-%:
+analyse-performance-%:
 	@source activate learna && \
-	python -m src.analyse.analyse_experiment_group --experiment_group resutls/$* --analysis_dir analysis/$* --root_sequences_dir data --ci_alpha 0.05
+	python -m src.analyse.analyse_experiment_group --experiment_group ../../results_raw/$* --analysis_dir analysis/$* --root_sequences_dir data --ci_alpha 0.05
 
 ## Analyse experiment group %
-analyse-nemo-%:
+analyse-performance-nemo-%:
 	@source activate learna && \
 	python -m src.analyse.analyse_experiment_group \
   	--experiment_group /work/ws/nemo/fr_ds371-learna-0/results/$* \
@@ -244,21 +275,36 @@ analyse-nemo-%:
   	--root_sequences_dir /work/ws/nemo/fr_ds371-learna-0/data
 		cp -r /work/ws/nemo/fr_ds371-learna-0/analysis/$* analysis
 
+## Analyse the output
+analyse-output-%:
+	@source activate learna && \
+	python -m src.analyse.analyse_output --experiment_group /home/fred/research/thesis/results_raw/thesis_new_output_gc_0$*
+
+## Analyse the output
+analyse-output-test:
+	@source activate learna && \
+	python -m src.analyse.analyse_output --experiment_group /home/fred/research/thesis/test_results/
+
+
 ## Plot reproduced results using pgfplots
 plots-%:
 	mkdir -p results
-	rm -f results/plots.tex
+	mkdir -p results/plots/
+	rm -f results/plots.*
+	rm -f results/plots/$*.*
 	> results/plots.tex
 	@source activate learna && \
 	python -m src.analyse.plot --experiment_group analysis/$* --results_dir results/
-	rm -rf results/plots/
 	@source activate learna && \
 	pdflatex -synctex=1 -interaction=nonstopmode -shell-escape results/plots.tex
-	mkdir -p results/plots/
-	mv plots.pdf results/plots/
+	mv plots.pdf results/plots/$*.pdf
 	rm -f plots*
-	okular results/plots/plots.pdf &
+	okular results/plots/$*.pdf &
 
+## Plot gc-control data
+final-plots:
+	rm -f pgfplots/*
+	pdflatex -synctex=1 -interaction=nonstopmode -shell-escape pgfplots.tex
 
 
 ################################################################################

@@ -6,12 +6,13 @@ import multiprocessing
 import numpy as np
 import ConfigSpace as CS
 from hpbandster.core.worker import Worker
+from pathlib import Path
 
 from src.learna.agent import NetworkConfig, get_network, AgentConfig
 from src.learna.environment import RnaDesignEnvironment, RnaDesignEnvironmentConfig
 from src.learna.design_rna import design_rna
 from src.learna.learn_to_design_rna import learn_to_design_rna
-from src.data.parse_dot_brackets import parse_dot_brackets
+from src.data.parse_dot_brackets import parse_dot_brackets, parse_local_design_data
 
 
 class MetaLearnaWorker(Worker):
@@ -21,16 +22,8 @@ class MetaLearnaWorker(Worker):
         super().__init__(**kwargs)
         self.num_cores = num_cores
         self.validation_timeout = validation_timeout
-        self.train_sequences = parse_dot_brackets(
-            dataset="rfam_learn/train",
-            data_dir=data_dir,
-            target_structure_ids=train_sequences,
-        )
-        self.validation_sequences = parse_dot_brackets(
-            dataset="rfam_learn/validation",
-            data_dir=data_dir,
-            target_structure_ids=range(1, 101),
-        )
+        self._data_dir = data_dir
+        self.sequence_ids = train_sequences
 
     def compute(self, config, budget, working_directory, config_id, **kwargs):
         """
@@ -46,6 +39,29 @@ class MetaLearnaWorker(Worker):
         shutil.rmtree(tmp_dir, ignore_errors=True)
         os.makedirs(tmp_dir, exist_ok=True)
         config = self._fill_config(config)
+
+        if config["local_design"]:
+            self.train_sequences = parse_local_design_data(
+                dataset=Path(self._data_dir, "rfam_local_train").stem,
+                data_dir=self._data_dir,
+                target_structure_ids=self.sequence_ids,
+            )
+            self.validation_sequences = parse_local_design_data(
+                dataset=Path(self._data_dir, "rfam_local_validation").stem,
+                data_dir=self._data_dir,
+                target_structure_ids=range(1, 100),
+            )
+        else:
+            self.train_sequences = parse_dot_brackets(
+                dataset="rfam_learn/train",
+                data_dir=self._data_dir,
+                target_structure_ids=train_sequences,
+            )
+            self.validation_sequences = parse_dot_brackets(
+                dataset="rfam_learn/validation",
+                data_dir=self._data_dir,
+                target_structure_ids=range(1, 100),
+            )
 
         network_config = NetworkConfig(
             conv_sizes=[config["conv_size1"], config["conv_size2"]],
@@ -66,11 +82,13 @@ class MetaLearnaWorker(Worker):
         env_config = RnaDesignEnvironmentConfig(
             reward_exponent=config["reward_exponent"],
             state_radius=config["state_radius"],
-            gc_weight=config["gc_weight"],
-            structural_weight=config["structural_weight"],
-            desired_gc=config["desired_gc"],
-            gc_improvement_step=True,
-            gc_postprocessing=False,
+            local_design=config["local_design"],
+            sequence_reward=bool(config["sequence_reward"]),
+            # gc_weight=config["gc_weight"],
+            # structural_weight=config["structural_weight"],
+            # desired_gc=config["desired_gc"],
+            # gc_improvement_step=True,
+            # gc_postprocessing=False,
         )
 
         try:
@@ -177,8 +195,8 @@ class MetaLearnaWorker(Worker):
         evaluation_sum_of_min_distances = 0
         evaluation_sum_of_first_distances = 0
         evaluation_num_solved = 0
-        evaluation_sum_of_min_gc_deltas = 0
-        evaluation_sum_of_min_gc_deltas_and_distances = 0
+        # evaluation_sum_of_min_gc_deltas = 0
+        # evaluation_sum_of_min_gc_deltas_and_distances = 0
 
 
         for r in evaluation_results:
@@ -187,14 +205,14 @@ class MetaLearnaWorker(Worker):
 
             times = np.array(list(map(lambda e: e.time, r)))
             dists = np.array(list(map(lambda e: e.normalized_hamming_distance, r)))
-            deltas_gc = np.array(list(map(lambda e: e.delta_gc, r)))
-            deltas_and_distances = np.array(list(map(lambda e: e.delta_gc + e.normalized_hamming_distance, r)))
+            # deltas_gc = np.array(list(map(lambda e: e.delta_gc, r)))
+            # deltas_and_distances = np.array(list(map(lambda e: e.delta_gc + e.normalized_hamming_distance, r)))
 
             evaluation_sum_of_min_distances += dists.min()
             evaluation_sum_of_first_distances += dists[0]
 
-            evaluation_sum_of_min_gc_deltas += deltas_gc.min()
-            evaluation_sum_of_min_gc_deltas_and_distances += deltas_and_distances.min()
+            # evaluation_sum_of_min_gc_deltas += deltas_gc.min()
+            # evaluation_sum_of_min_gc_deltas_and_distances += deltas_and_distances.min()
 
             evaluation_num_solved += dists.min() == 0.0
 
@@ -203,18 +221,18 @@ class MetaLearnaWorker(Worker):
                 "mean_time_per_episode": float((times[1:] - times[:-1]).mean()),
                 "min_distance": float(dists.min()),
                 "last_distance": float(dists[-1]),
-                "min_delta_gc": float(deltas_gc.min()),
-                "last_delta_gc": float(deltas_gc[-1]),
-                "min_deltas_and_distances": float(deltas_and_distances.min()),
-                "last_deltas_and_distances": float(deltas_and_distances[-1]),
+                # "min_delta_gc": float(deltas_gc.min()),
+                # "last_delta_gc": float(deltas_gc[-1]),
+                # "min_deltas_and_distances": float(deltas_and_distances.min()),
+                # "last_deltas_and_distances": float(deltas_and_distances[-1]),
             }
 
         evaluation_info = {
             "num_solved": int(evaluation_num_solved),
             "sum_of_min_distances": float(evaluation_sum_of_min_distances),
             "sum_of_first_distances": float(evaluation_sum_of_first_distances),
-            "sum_of_min_gc_deltas": float(evaluation_sum_of_min_gc_deltas),
-            "sum_of_min_deltas_and_distances": float(evaluation_sum_of_min_gc_deltas_and_distances),
+            # "sum_of_min_gc_deltas": float(evaluation_sum_of_min_gc_deltas),
+            # "sum_of_min_deltas_and_distances": float(evaluation_sum_of_min_gc_deltas_and_distances),
             "squence_infos": evaluation_sequence_infos,
         }
 
@@ -227,26 +245,26 @@ class MetaLearnaWorker(Worker):
         # parameters for PPO here
         config_space.add_hyperparameter(
             CS.UniformFloatHyperparameter(
-                "learning_rate", lower=1e-6, upper=1e-4, log=True, default_value=1e-5
+                "learning_rate", lower=1e-6, upper=1e-3, log=True, default_value=1e-5  # FR: Changed learning_rate upper from 1e-4 to 1e-3
             )
         )
         config_space.add_hyperparameter(
             CS.UniformIntegerHyperparameter(
-                "batch_size", lower=32, upper=128, log=True, default_value=32
+                "batch_size", lower=32, upper=256, log=True, default_value=32  # FR: changed batch size upper from 128 to 256, configs from ICLR used 126 (LEARNA) and 123 (Meta-LEARNA)
             )
         )
         config_space.add_hyperparameter(
             CS.UniformFloatHyperparameter(
                 "entropy_regularization",
-                lower=5e-5,
-                upper=5e-3,
+                lower=5e-7,  # FR: changed entropy regularization lower from 1e-5 to 1e-7, ICLR: LEARNA (6,76e-5), Meta-LEARNA (151e-4)
+                upper=5e-2,  # FR: changed entropy regularization upper from 1e-3 to 1e-2, ICLR: LEARNA (6,76e-5), Meta-LEARNA (151e-4)
                 log=True,
                 default_value=1.5e-3,
             )
         )
         config_space.add_hyperparameter(
             CS.UniformFloatHyperparameter(
-                "reward_exponent", lower=1, upper=10, default_value=1
+                "reward_exponent", lower=1, upper=12, default_value=1  # FR: changed reward_exponent upper from 10 to 12, ICLR: Learna (9.34), Meta-LEARNA (8.93)
             )
         )
         config_space.add_hyperparameter(
@@ -291,7 +309,7 @@ class MetaLearnaWorker(Worker):
 
         config_space.add_hyperparameter(
             CS.UniformIntegerHyperparameter(
-                "num_lstm_layers", lower=0, upper=2, default_value=0
+                "num_lstm_layers", lower=0, upper=3, default_value=0  # FR: changed lstm layers upper from 2 to 3
             )
         )
         config_space.add_hyperparameter(
@@ -302,22 +320,15 @@ class MetaLearnaWorker(Worker):
 
         config_space.add_hyperparameter(
             CS.UniformIntegerHyperparameter(
-                "embedding_size", lower=0, upper=4, default_value=1
+                "embedding_size", lower=0, upper=8, default_value=1  # FR: changed embedding size upper from 4 to 8
             )
         )
 
         config_space.add_hyperparameter(
-            CS.UniformFloatHyperparameter(
-                "structural_weight", lower=0, upper=1, default_value=1
+         CS.UniformFloatHyperparameter(
+             "sequence_reward", lower=0, upper=1, default_value=0
             )
         )
-
-        config_space.add_hyperparameter(
-            CS.UniformFloatHyperparameter(
-                "gc_weight", lower=0, upper=1, default_value=1
-            )
-        )
-
 
         return config_space
 
@@ -335,7 +346,7 @@ class MetaLearnaWorker(Worker):
 
         if config["conv_size1"] != 0:
             min_state_radius = config["conv_size1"] + config["conv_size1"] - 1
-            max_state_radius = 32
+            max_state_radius = 64  # FR changed max state radius from 32 to 64, ICLR: LEARNA (32), Meta-LEARNA (29)
             config["state_radius"] = int(
                 min_state_radius
                 + (max_state_radius - min_state_radius) * config["state_radius_relative"]
@@ -343,14 +354,15 @@ class MetaLearnaWorker(Worker):
             del config["state_radius_relative"]
         else:
             min_state_radius = config["conv_size2"] + config["conv_size2"] - 1
-            max_state_radius = 32
+            max_state_radius = 64  # FR changed max state radius from 32 to 64, ICLR: LEARNA (32), Meta-LEARNA (29)
             config["state_radius"] = int(
                 min_state_radius
                 + (max_state_radius - min_state_radius) * config["state_radius_relative"]
             )
             del config["state_radius_relative"]
-        config["desired_gc"] = np.random.choice([.1, .2, .3, .4, .5, .6, .7, .8, .9])
+        # config["desired_gc"] = np.random.choice([.1, .2, .3, .4, .5, .6, .7, .8, .9])
         config["restart_timeout"] = None
+        config["local_design"] = True
 
         return config
 

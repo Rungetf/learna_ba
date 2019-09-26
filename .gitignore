@@ -3,6 +3,11 @@ data/eterna/*.rna
 data/rfam_learn_test/
 data/rfam_learn_validation/
 data/rfam_learn_train/
+data/rfam_local_*/
+data/rfam_processed/
+data/rfam_interim/
+data/test/
+data/rfam_raw/
 
 # thirdparty
 thirdparty/antarna/src/
@@ -20,6 +25,10 @@ analysis/*
 
 # cluster
 logs/
+
+# plots
+pgfplots*
+plots*
 
 # misc
 *__pycache__/

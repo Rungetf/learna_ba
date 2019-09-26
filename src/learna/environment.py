@@ -1,4 +1,5 @@
 import time
+import re
 
 from itertools import product
 from dataclasses import dataclass
@@ -23,6 +24,12 @@ class RnaDesignEnvironmentConfig:
             at each position.
         use_conv: Bool to state if a convolutional network is used or not.
         use_embedding: Bool to state if embedding is used or not.
+        gc_improvement_step: Bool to decide if gc_improvement step is used.
+        gc_tolerance: The tolerance for gc content.
+        desired_gc: The gc_content that is desired.
+        gc_weight: Determines how much weight is set on the gc content control.
+        gc_reward: Bool to decide if the gc_content is included in the reward function.
+        num_actions: The number of actions the agent can choose from.
     """
 
     mutation_threshold: int = 5
@@ -30,11 +37,16 @@ class RnaDesignEnvironmentConfig:
     state_radius: int = 5
     use_conv: bool = True
     use_embedding: bool = False
-    gc_improvement_step: bool = False
-    gc_tolerance: float = 0.04
-    desired_gc: float = 0.5
-    gc_weight: float = 1.0
-    gc_reward: bool = False
+    # gc_improvement_step: bool = False
+    # gc_tolerance: float = 0.04
+    # desired_gc: float = 0.5
+    # gc_weight: float = 1.0
+    # gc_reward: bool = False
+    local_design: bool = True
+    # num_actions: int = 4
+    # keep_sequence: str = 'fully'
+    sequence_reward: bool = False
+    # training_data: str = 'random'
 
 
 def _string_difference_indices(s1, s2):
@@ -67,9 +79,9 @@ def _encode_dot_bracket(secondary, env_config):
     padded_secondary = padding + secondary + padding
 
     if env_config.use_embedding:
-        site_encoding = {".": 0, "(": 1, ")": 2, "=": 3}
+        site_encoding = {".": 0, "(": 1, ")": 2, "=": 3, "A": 4, "G": 5, "C": 6, "U": 7}  # add acgu
     else:
-        site_encoding = {".": 0, "(": 1, ")": 1, "=": 0}
+        site_encoding = {".": 0, "(": 1, ")": 1, "=": 0, "A": 2, "G": 3, "C": 4, "U": 5}  # add acgu
 
     # Sites corresponds to 1 pixel with 1 channel if convs are applied directly
     if env_config.use_conv and not env_config.use_embedding:
@@ -86,9 +98,12 @@ def _encode_pairing(secondary):
         if symbol == "(":
             stack.append(index)
         elif symbol == ")":
-            paired_site = stack.pop()
-            pairing_encoding[paired_site] = index
-            pairing_encoding[index] = paired_site
+            try:
+                paired_site = stack.pop()
+                pairing_encoding[paired_site] = index
+                pairing_encoding[index] = paired_site
+            except:
+                continue
     return pairing_encoding
 
 
@@ -206,7 +221,7 @@ class LocalImprovement(object):
             if paired_site:
                 primary[site] = 'G'
                 primary[paired_site] = 'C'
-            if hamming(fold(''.join(primary))[0], self._target.dot_bracket) == hamming_distance:
+            if hamming(fold(''.join(primary))[0], self._target.dot_bracket) == hamming_distance:  # this should probably be <=
                 self._design.assign_sites(0, site, self._target.get_paired_site(site))
             else:
                 return
@@ -215,7 +230,7 @@ class LocalImprovement(object):
             if paired_site:
                 primary[site] = 'C'
                 primary[paired_site] = 'G'
-            if hamming(fold(''.join(primary))[0], self._target.dot_bracket) == hamming_distance:
+            if hamming(fold(''.join(primary))[0], self._target.dot_bracket) == hamming_distance:  # this should probably be <=
                     self._design.assign_sites(1, site, self._target.get_paired_site(site))
             else:
                 return
@@ -228,7 +243,7 @@ class LocalImprovement(object):
             if paired_site:
                 primary[site] = 'A'
                 primary[paired_site] = 'U'
-            if hamming(fold(''.join(primary))[0], self._target.dot_bracket) == hamming_distance:
+            if hamming(fold(''.join(primary))[0], self._target.dot_bracket) == hamming_distance:  # this should probably be <=
                 self._design.assign_sites(2, site, self._target.get_paired_site(site))
             else:
                 return
@@ -237,7 +252,7 @@ class LocalImprovement(object):
             if paired_site:
                 primary[site] = 'U'
                 primary[paired_site] = 'A'
-            if hamming(fold(''.join(primary))[0], self._target.dot_bracket) == hamming_distance:
+            if hamming(fold(''.join(primary))[0], self._target.dot_bracket) == hamming_distance:  # this should probably be <=
                     self._design.assign_sites(3, site, self._target.get_paired_site(site))
             else:
                 return
@@ -258,10 +273,27 @@ class _Target(object):
              env_config: The environment configuration.
         """
         _Target._id_counter += 1
-        self.id = _Target._id_counter  # For processing results
-        self.dot_bracket = dot_bracket
-        self._pairing_encoding = _encode_pairing(self.dot_bracket)
-        self.padded_encoding = _encode_dot_bracket(self.dot_bracket, env_config)
+        self.id = dot_bracket[0] if env_config.local_design and len(dot_bracket) >= 7 else _Target._id_counter  # For processing results
+        self.dot_bracket = dot_bracket[1] if env_config.local_design and len(dot_bracket) >= 7 else dot_bracket
+        self.sequence = dot_bracket[2] if env_config.local_design and len(dot_bracket) >= 7 else None
+        self.local_target = dot_bracket[3] if env_config.local_design and len(dot_bracket) >= 7 else None
+        self.local_motif = dot_bracket[4] if env_config.local_design and len(dot_bracket) >= 7 else None
+        self.gc = dot_bracket[5] if env_config.local_design and len(dot_bracket) >= 7 else None
+        self.mfe = dot_bracket[6] if env_config.local_design and len(dot_bracket) >= 7 else None
+        self._pairing_encoding = _encode_pairing(self.dot_bracket) if not env_config.local_design else _encode_pairing(self.local_target)
+        self.padded_encoding = _encode_dot_bracket(self.dot_bracket, env_config) if not env_config.local_design else _encode_dot_bracket(self.local_target, env_config)
+
+    def get_sequence_parts(self):
+        sequence_pattern = re.compile(r"\w+")
+        sequence_parts = []
+        current_index = 0
+        for pattern in sequence_pattern.findall(self.local_target):
+            start, end = re.search(pattern, self.local_target[current_index:]).span()
+            sequence_parts.append((start + current_index, end + current_index))
+            current_index += end
+        # sequence_parts = [re.search(pattern, self.local_target).span() for pattern in sequence_pattern.findall(self.local_target)]  # TODO: fix bug: for small motifs, search finds early mathces, index is not next index....
+        structure_parts = [(x[1], y[0]) for x, y in zip(sequence_parts, sequence_parts[1:])]
+        return sequence_parts, structure_parts
 
     def __len__(self):
         return len(self.dot_bracket)
@@ -278,13 +310,12 @@ class _Target(object):
         """
         return self._pairing_encoding[site]
 
-
 class _Design(object):
     """
     Class of the designed candidate solution.
     """
 
-    action_to_base = {0: "G", 1: "A", 2: "U", 3: "C"}
+    action_to_base = {0: "G", 1: "A", 2: "U", 3: "C", 4:'_'}
     action_to_pair = {0: "GC", 1: "CG", 2: "AU", 3: "UA"}
 
     def __init__(self, length=None, primary=None):
@@ -335,6 +366,12 @@ class _Design(object):
         else:
             self._primary_list[site] = self.action_to_base[action]
 
+    def replace_subsequences(self, target, keep_sequence):
+        if keep_sequence == 'fully':
+            mutations_and_sites = [(mutation, site) for site, mutation in enumerate(target) if mutation not in ['.', '(', ')']]
+        mutations_and_sites = [(target[site], site) for site, _ in enumerate(self.primary) if _ == '_']
+        return design.get_mutated([x[0] for x in mutations_and_sites], [x[1] for x in mutations_and_sites])
+
     @property
     def first_unassigned_site(self):
         try:
@@ -371,10 +408,10 @@ class EpisodeInfo:
     target_id: int
     time: float
     normalized_hamming_distance: float
-    gc_content: float
-    agent_gc: float
-    delta_gc: float
-    gc_satisfied: bool
+    # gc_content: float
+    # agent_gc: float
+    # delta_gc: float
+    # gc_satisfied: bool
 
 
 
@@ -399,7 +436,7 @@ gc control
         self.target = None
         self.design = None
         # print(self._env_config.gc_tolerance, self._env_config.desired_gc)
-        self._constraint_controller = ConstraintControler(self._env_config.gc_tolerance, self._env_config.desired_gc)
+        # self._constraint_controller = ConstraintControler(self._env_config.gc_tolerance, self._env_config.desired_gc)
         self.episodes_info = []
 
     def __str__(self):
@@ -455,49 +492,123 @@ gc control
         if not terminal:
             return 0
 
-        agent_gc = self._constraint_controller.gc_diff(self.design)
+        # reward formulation for RNA local Design, excluding local improvement steps and gc content!!!!
+        if self._env_config.local_design:
+            # replace sequence parts of candidate solution from sequence of target according to env_config
+            # self.design = self.design.replace_subsequences(self.target, self._env_config.keep_sequences)
 
-        hamming_distance = self._constraint_controller.hamming_distance(fold(self.design.primary)[0], self.target)
+            distance = 0
+            folding = fold(self.design.primary)[0]
+            # print(f"current target: {self.target.local_target}")
+            # print(f"target length: {len(self.target.local_target)}")
+            sequence_parts, folding_parts = self.target.get_sequence_parts()  # return tuple of <sequence start, sequence end>
+            # print(sequence_parts)
+            # print(folding_parts)
 
-        # start local improvement procedure
-        _local_improvement = LocalImprovement(self.design, self.target, self._constraint_controller)
-        if 0 < hamming_distance < self._env_config.mutation_threshold:
-            # improve wrt structural constraints
-            self.design, hamming_distance = _local_improvement.structural_improvement_step()
-            # improve wrt gc-content constraint
-            if self._env_config.gc_improvement_step:
-                self.design = _local_improvement.gc_improvement_step(hamming_distance=hamming_distance)
+            if not self._env_config.sequence_reward:
+                design = [c for c in self.design.primary]
+                for start, end in sequence_parts:
+                    design[start:end] = self.target.local_target[start:end]
+                self.design = _Design(primary=''.join(design))
+                # print(design)
+                # print(self.target.local_target)
+                # print(folding)
+                folding = fold(self.design.primary)[0]
+
+            for start, end in folding_parts:
+                # print('structure parts')
+                distance +=  hamming(folding[start:end], self.target.local_target[start:end]) # self._constraint_controler.hamming_distance(fold(self.design.primary)[0][start:end], self.target.local_target[start:end])
+                print(f"target: {self.target.local_target[start:end]}")
+                print(f"design: {folding[start:end]}")
+                # print(f"distance structure: {distance}")
+                if not self._env_config.sequence_reward:
+                    normalized_distance = (distance / len(self.target))
+                    # print(f"normalized distance {normalized_distance}")
+                    episode_info = EpisodeInfo(
+                    target_id=self.target.id,
+                    time=time.time(),
+                    normalized_hamming_distance=normalized_distance,
+                    )
+                    self.episodes_info.append(episode_info)
+                    if distance == 0:
+                        return 1.0
+
+                    return (1 - normalized_distance) ** self._env_config.reward_exponent
+
+
+
+            if self._env_config.sequence_reward:
+                for start, end in sequence_parts:
+                    distance += hamming(self.design.primary[start:end], self.target.local_target[start:end])  # self._constraint_controller.hamming_distance(self.design.primary[start:end], self.target.local_target[start:end])
+                    # print('sequence parts')
+                    # print(f"target: {self.target.local_target[start:end]}")
+                    # print(f"design: {self.design.primary[start:end]}")
+
+            # print(f"distance sequence and structure: {distance}")
+            normalized_distance = (distance / len(self.target))
+            # print(f"normalized distance {normalized_distance}")
+            episode_info = EpisodeInfo(
+                target_id=self.target.id,
+                time=time.time(),
+                normalized_hamming_distance=normalized_distance,
+            )
+            self.episodes_info.append(episode_info)
+
+
+            if distance == 0:
+                return 1.0
+            return (1 - normalized_distance) ** self._env_config.reward_exponent
+
+
+
+        # agent_gc = self._constraint_controller.gc_content(self.design)
+
+        # hamming_distance = self._constraint_controller.hamming_distance(fold(self.design.primary)[0], self.target)
+
+        # # start local improvement procedure
+        # local_improvement = LocalImprovement(self.design, self.target, self._constraint_controller)
+        # if 0 < hamming_distance < self._env_config.mutation_threshold:
+        #     # improve wrt structural constraints
+        #     self.design, hamming_distance = local_improvement.structural_improvement_step()
+        #     # improve wrt gc-content constraint
+        #     if self._env_config.gc_improvement_step:
+        #         self.design = local_improvement.gc_improvement_step(hamming_distance=hamming_distance)
 
         # # apply gc_control as postprocessing step if hamming distance is 0
         # if hamming_distance == 0 and self._env_config.gc_postprocessing:
-        #     self.design = _local_improvement.gc_improvement_step(hamming_distance=hamming_distance)
+        #     self.design = local_improvement.gc_improvement_step(hamming_distance=hamming_distance)
 
-        normalized_hamming_distance = self._constraint_controller.normalized_hamming_distance(fold(self.design.primary)[0], self.target)
-        delta_gc = self._constraint_controller.gc_diff_abs(self.design)
+        # normalized_hamming_distance = self._constraint_controller.normalized_hamming_distance(fold(self.design.primary)[0], self.target)
+        # delta_gc = self._constraint_controller.gc_diff_abs(self.design)
 
         # For hparam optimization
-        episode_info = EpisodeInfo(
-            target_id=self.target.id,
-            time=time.time(),
-            normalized_hamming_distance=normalized_hamming_distance,
-            gc_content=self._constraint_controller.gc_content(self.design),
-            agent_gc=agent_gc,
-            delta_gc=delta_gc,
-            gc_satisfied=self._constraint_controller.gc_satisfied(self.design)
-        )
-        self.episodes_info.append(episode_info)
+        # episode_info = EpisodeInfo(
+        #     target_id=self.target.id,
+        #     time=time.time(),
+        #     normalized_hamming_distance=normalized distance,
+        #     # gc_content=self._constraint_controller.gc_content(self.design),
+        #     # agent_gc=agent_gc,
+        #     # delta_gc=delta_gc,
+        #     # gc_satisfied=self._constraint_controller.gc_satisfied(self.design)
+        # )
+        # self.episodes_info.append(episode_info)
 
-        delta_gc = 0 if self._constraint_controller.gc_satisfied(self.design) else delta_gc
+        # delta_gc = 0 if self._constraint_controller.gc_satisfied(self.design) else delta_gc
 
-        if hamming_distance == 0 and self._constraint_controller.gc_satisfied(self.design):
-            return 1.0
+        # if self._local_design:
+        #     return
 
-        # Jointly optimize for gc-content and structural constraint if gc content optimization desired
-        if self._env_config.gc_reward:
-            return (1 - min(normalized_hamming_distance + self._env_config.gc_weight * delta_gc, 1)) ** self._env_config.reward_exponent  # (1 - (normalized_hamming_distance + delta_gc) ** alpha worked, why?
+        # Jointly reward gc-content and structural constraint if gc content optimization desired
+        # if self._env_config.gc_reward:
+        #     if hamming_distance == 0 and delta_gc == 0:
+        #         return 1.0
 
-        # Else return normalized hamming distance
-        return (1 - normalized_hamming_distance) ** self._env_config.reward_exponent
+        #     return (1 - min(normalized_hamming_distance + self._env_config.gc_weight * delta_gc, 1)) ** self._env_config.reward_exponent  # (1 - (normalized_hamming_distance + delta_gc) ** alpha worked, why?
+
+        # Else return normalized hamming distance based reward
+        # if hamming_distance == 0:
+        #     return 1.0
+        # return (1 - normalized_hamming_distance) ** self._env_config.reward_exponent
 
     def execute(self, actions):
         """
