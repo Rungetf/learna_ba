@@ -108,8 +108,8 @@ class MetaLearnaWorker(Worker):
             raise
 
         return {
-            # "loss": validation_info["sum_of_min_distances"],
-            "loss": validation_info["sum_of_min_deltas_and_distances"],
+            "loss": validation_info["sum_of_min_distances"],
+            # "loss": validation_info["sum_of_min_deltas_and_distances"],
             "info": {"train_info": train_info, "validation_info": validation_info},
         }
 
