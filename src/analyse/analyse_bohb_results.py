@@ -3,58 +3,70 @@ import hpbandster.core.result as hpres
 import hpbandster.visualization as hpvis
 
 
+def analyse_bohb_run(run):
+    # load the example run from the log files
+    result = hpres.logged_results_to_HBS_result(f"results/bohb/{run}")
 
-# load the example run from the log files
-result = hpres.logged_results_to_HBS_result('results/bohb/5739379')
+    # get all executed runs
+    all_runs = result.get_all_runs()
 
-# get all executed runs
-all_runs = result.get_all_runs()
-
-# get the 'dict' that translates config ids to the actual configurations
-id2conf = result.get_id2config_mapping()
-
-
-# Here is how you get he incumbent (best configuration)
-inc_id = result.get_incumbent_id()
-
-# let's grab the run on the highest budget
-inc_runs = result.get_runs_by_id(inc_id)
-inc_run = inc_runs[-1]
+    # get the 'dict' that translates config ids to the actual configurations
+    id2conf = result.get_id2config_mapping()
 
 
-# We have access to all information: the config, the loss observed during
-#optimization, and all the additional information
-inc_loss = inc_run.loss
-inc_config = id2conf[inc_id]['config']
-inc_test_loss = inc_run.info['validation_info']
+    # Here is how you get he incumbent (best configuration)
+    inc_id = result.get_incumbent_id()
 
-print('Best found configuration:')
-print(inc_config)
-# print('It achieved accuracies of %f (validation) and %f (test).'%(1-inc_loss, inc_test_loss))
-print(f"validation info of inc: {inc_test_loss}")
+    # let's grab the run on the highest budget
+    inc_runs = result.get_runs_by_id(inc_id)
+    inc_run = inc_runs[-1]
 
-# # Let's plot the observed losses grouped by budget,
-# hpvis.losses_over_time(all_runs)
-#
-# # the number of concurent runs,
-# hpvis.concurrent_runs_over_time(all_runs)
-#
-# # and the number of finished runs.
-# hpvis.finished_runs_over_time(all_runs)
-#
-# # This one visualizes the spearman rank correlation coefficients of the losses
-# # between different budgets.
-# hpvis.correlation_across_budgets(result)
-#
-# # For model based optimizers, one might wonder how much the model actually helped.
-# # The next plot compares the performance of configs picked by the model vs. random ones
-# hpvis.performance_histogram_model_vs_random(all_runs, id2conf)
-#
-# plt.show()
 
-pd = result.get_pandas_dataframe()
-# print(pd)
+    # We have access to all information: the config, the loss observed during
+    #optimization, and all the additional information
+    inc_loss = inc_run.loss
+    inc_config = id2conf[inc_id]['config']
+    inc_test_loss = inc_run.info['validation_info']
 
-all_solved = [(x.info['validation_info']['num_solved'], y.loss) for x in all_runs for y in all_runs]
-# print(all_solved)
-print(sorted(all_solved, key=lambda x: x[0]))
+    print('Best found configuration:')
+    print(inc_config)
+    # print('It achieved accuracies of %f (validation) and %f (test).'%(1-inc_loss, inc_test_loss))
+    print(f"validation info of inc: {inc_test_loss}")
+
+    # Let's plot the observed losses grouped by budget,
+    hpvis.losses_over_time(all_runs)
+
+    # the number of concurent runs,
+    hpvis.concurrent_runs_over_time(all_runs)
+
+    # and the number of finished runs.
+    hpvis.finished_runs_over_time(all_runs)
+
+    # This one visualizes the spearman rank correlation coefficients of the losses
+    # between different budgets.
+    hpvis.correlation_across_budgets(result)
+
+    # For model based optimizers, one might wonder how much the model actually helped.
+    # The next plot compares the performance of configs picked by the model vs. random ones
+    hpvis.performance_histogram_model_vs_random(all_runs, id2conf)
+
+    plt.show()
+
+    # pd = result.get_pandas_dataframe()
+    # print(pd)
+
+    # all_solved = [(x.info['validation_info']['num_solved'], y.loss) for x in all_runs for y in all_runs]
+    # print(all_solved)
+    # print(sorted(all_solved, key=lambda x: x[0]))
+
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--run", type=str, help="The id of the run"
+    )
+
+    args = parser.parse_args()
+
+    analyse_bohb_run(args.run)

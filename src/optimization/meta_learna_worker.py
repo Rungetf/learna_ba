@@ -325,7 +325,7 @@ class MetaLearnaWorker(Worker):
         )
 
         config_space.add_hyperparameter(
-         CS.UniformFloatHyperparameter(
+         CS.UniformIntegerHyperparameter(
              "sequence_reward", lower=0, upper=1, default_value=0
             )
         )

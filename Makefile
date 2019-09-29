@@ -284,6 +284,11 @@ analyse-output-test:
 	@source activate learna && \
 	python -m src.analyse.analyse_output --experiment_group /home/fred/research/thesis/test_results/
 
+## Analyse Bohb runs
+analyse-bohb-%:
+	@source activate learna && \
+	python -m src.analyse.analyse_bohb_results --run $*
+
 
 ## Plot reproduced results using pgfplots
 plots-%:
