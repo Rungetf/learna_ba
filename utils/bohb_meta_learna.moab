@@ -3,7 +3,7 @@
 #MSUB -E
 #MSUB -e logs/${MOAB_JOBID}.e
 #MSUB -o logs/${MOAB_JOBID}.o
-#MSUB -l nodes=1:ppn=20,walltime=4:00:00:00
+#MSUB -l nodes=1:ppn=20,walltime=2:00:00:00
 #MSUB -t [1-50]
 
 WSPATH=/work/ws/nemo/fr_ds371-learna-0/
