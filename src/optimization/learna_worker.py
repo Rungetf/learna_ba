@@ -286,14 +286,14 @@ class LearnaWorker(Worker):
 
         if config["conv_size1"] != 0:
             min_state_radius = config["conv_size1"] + config["conv_size1"] - 1
-            max_state_radius = 64  # FR changed max state radius from 32 to 64, ICLR: LEARNA (32), Meta-LEARNA (29)
+            max_state_radius = 32  # FR changed max state radius from 32 to 64, ICLR: LEARNA (32), Meta-LEARNA (29)
             config["state_radius"] = int(
                 min_state_radius
                 + (max_state_radius - min_state_radius) * config["state_radius_relative"]
             )
         else:
             min_state_radius = config["conv_size2"] + config["conv_size2"] - 1
-            max_state_radius = 64  # FR changed max state radius from 32 to 64, ICLR: LEARNA (32), Meta-LEARNA (29)
+            max_state_radius = 32  # FR changed max state radius from 32 to 64, ICLR: LEARNA (32), Meta-LEARNA (29)
             config["state_radius"] = int(
                 min_state_radius
                 + (max_state_radius - min_state_radius) * config["state_radius_relative"]
