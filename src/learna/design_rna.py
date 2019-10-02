@@ -31,7 +31,7 @@ def _get_episode_finished(timeout, stop_once_solved):
         # gc_satisfied = env.episodes_info[-1].gc_satisfied
         elapsed_time = time.time() - start_time
         # print(elapsed_time, last_reward, last_fractional_hamming, gc_satisfied, last_gc_content, agent_gc, candidate_solution)
-        print(elapsed_time, last_reward, candidate_solution)
+        # print(elapsed_time, last_reward, candidate_solution)
 
         no_timeout = not timeout or elapsed_time < timeout
         stop_since_solved = stop_once_solved and last_reward == 1.0
