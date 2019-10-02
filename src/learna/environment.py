@@ -45,7 +45,9 @@ class RnaDesignEnvironmentConfig:
     local_design: bool = True
     # num_actions: int = 4
     # keep_sequence: str = 'fully'
-    sequence_reward: bool = False
+    # sequence_reward: bool = False
+    predict_pairs: bool = False
+    reward_function: str = 'structure'
     # training_data: str = 'random'
 
 
@@ -106,6 +108,12 @@ def _encode_pairing(secondary):
                 continue
     return pairing_encoding
 
+def _encode_structure_parts(local_target):
+    encoding = [None] * len(local_target)
+    for index, site in enumerate(local_target):
+        if site in ['.', '(', ')']:
+            encoding[index] = site
+    return encoding
 
 class ConstraintControler(object):
     """TODO
@@ -222,7 +230,7 @@ class LocalImprovement(object):
                 primary[site] = 'G'
                 primary[paired_site] = 'C'
             if hamming(fold(''.join(primary))[0], self._target.dot_bracket) == hamming_distance:  # this should probably be <=
-                self._design.assign_sites(0, site, self._target.get_paired_site(site))
+                self._design.assign_sites(0, site, self._target.get_paired_site(site))  # TODO: predict_pairs is not in the call!!!!
             else:
                 return
         elif self._design.primary[site] == 'U':
@@ -231,7 +239,7 @@ class LocalImprovement(object):
                 primary[site] = 'C'
                 primary[paired_site] = 'G'
             if hamming(fold(''.join(primary))[0], self._target.dot_bracket) == hamming_distance:  # this should probably be <=
-                    self._design.assign_sites(1, site, self._target.get_paired_site(site))
+                    self._design.assign_sites(1, site, self._target.get_paired_site(site))  # TODO: predict_pairs is not in the call!!!!
             else:
                 return
 
@@ -244,7 +252,7 @@ class LocalImprovement(object):
                 primary[site] = 'A'
                 primary[paired_site] = 'U'
             if hamming(fold(''.join(primary))[0], self._target.dot_bracket) == hamming_distance:  # this should probably be <=
-                self._design.assign_sites(2, site, self._target.get_paired_site(site))
+                self._design.assign_sites(2, site, self._target.get_paired_site(site))  # TODO: predict_pairs is not in the call!!!!
             else:
                 return
         elif self._design.primary[site] == 'C':
@@ -253,7 +261,7 @@ class LocalImprovement(object):
                 primary[site] = 'U'
                 primary[paired_site] = 'A'
             if hamming(fold(''.join(primary))[0], self._target.dot_bracket) == hamming_distance:  # this should probably be <=
-                    self._design.assign_sites(3, site, self._target.get_paired_site(site))
+                    self._design.assign_sites(3, site, self._target.get_paired_site(site))  # TODO: predict_pairs is not in the call!!!!
             else:
                 return
 
@@ -273,6 +281,7 @@ class _Target(object):
              env_config: The environment configuration.
         """
         _Target._id_counter += 1
+        self._env_config = env_config
         self.id = dot_bracket[0] if env_config.local_design and len(dot_bracket) >= 7 else _Target._id_counter  # For processing results
         self.dot_bracket = dot_bracket[1] if env_config.local_design and len(dot_bracket) >= 7 else dot_bracket
         self.sequence = dot_bracket[2] if env_config.local_design and len(dot_bracket) >= 7 else None
@@ -282,6 +291,9 @@ class _Target(object):
         self.mfe = dot_bracket[6] if env_config.local_design and len(dot_bracket) >= 7 else None
         self._pairing_encoding = _encode_pairing(self.dot_bracket) if not env_config.local_design else _encode_pairing(self.local_target)
         self.padded_encoding = _encode_dot_bracket(self.dot_bracket, env_config) if not env_config.local_design else _encode_dot_bracket(self.local_target, env_config)
+        self._current_site = 0
+        if env_config.reward_function == 'structure_only':
+            self.structure_parts_encoding = _encode_structure_parts(self.local_target)
 
     def get_sequence_parts(self):
         sequence_pattern = re.compile(r"\w+")
@@ -309,6 +321,27 @@ class _Target(object):
             The site that pairs with <site> if exists.TODO
         """
         return self._pairing_encoding[site]
+
+    def reset_counter(self):
+        self._current_site = 0
+        self.structure_parts_encoding = _encode_structure_parts(self.local_target)
+
+    @property
+    def next_structure_site(self):
+        try:
+            while self.structure_parts_encoding[self._current_site] is None:
+                self._current_site += 1
+            self.structure_parts_encoding[self._current_site] = None
+            if self._env_config.predict_pairs and self.get_paired_site(self._current_site):
+                self.structure_parts_encoding[self.get_paired_site(self._current_site)] = None
+            return self._current_site
+        except IndexError:
+            return None
+
+    @property
+    def current_site(self):
+        return self._current_site
+
 
 class _Design(object):
     """
@@ -349,7 +382,7 @@ class _Design(object):
             mutatedprimary[site] = mutation
         return _Design(primary=mutatedprimary)
 
-    def assign_sites(self, action, site, paired_site=None):
+    def assign_sites(self, action, site, paired_site=None, predict_pairs=False):
         """
         Assign nucleotides to sites for designing a candidate solution.
 
@@ -359,7 +392,7 @@ class _Design(object):
             paired_site: defines if the site is assigned with a base pair or not.
         """
         self._current_site += 1
-        if paired_site:
+        if predict_pairs and paired_site:
             base_current, base_paired = self.action_to_pair[action]
             self._primary_list[site] = base_current
             self._primary_list[paired_site] = base_paired
@@ -453,6 +486,8 @@ gc control
             The first state.
         """
         self.target = next(self._target_gen)
+        if self._env_config.reward_function == 'structure_only':
+            self.target.reset_counter()
         self.design = _Design(len(self.target))
         return self._get_state()
 
@@ -463,9 +498,9 @@ gc control
         Args:
             action: The action chosen by the agent.
         """
-        current_site = self.design.first_unassigned_site
-        paired_site = self.target.get_paired_site(current_site)  # None for unpaired sites
-        self.design.assign_sites(action, current_site, paired_site)
+        current_site = self.design.first_unassigned_site if not self._env_config.reward_function == 'structure_only' else self.target.current_site
+        paired_site = self.target.get_paired_site(current_site) if self._env_config.predict_pairs else None  # None for unpaired sites
+        self.design.assign_sites(action, current_site, paired_site, self._env_config.predict_pairs)
 
     def _get_state(self):
         """
@@ -474,7 +509,7 @@ gc control
         Returns:
             The next state.
         """
-        start = self.design.first_unassigned_site
+        start = self.target.next_structure_site if self._env_config.reward_function == 'structure_only' else self.design.first_unassigned_site
         return self.target.padded_encoding[
             start : start + 2 * self._env_config.state_radius + 1
         ]
@@ -495,11 +530,14 @@ gc control
         # reward formulation for RNA local Design, excluding local improvement steps and gc content!!!!
         if self._env_config.local_design:
             distance = 0
-            folding = fold(self.design.primary)[0]
+            folding = fold(self.design.primary)[0] if not self._env_config.reward_function == 'structure_only' else None
             sequence_parts, folding_parts = self.target.get_sequence_parts()  # return tuple of <sequence start, sequence end>
 
-            if not self._env_config.sequence_reward:
-                design = [c for c in self.design.primary]
+            if self._env_config.reward_function == 'sequence_and_structure':
+                for start, end in sequence_parts:
+                    distance += hamming(self.design.primary[start:end], self.target.local_target[start:end])
+            else:
+                design = [c for c in self.design._primary_list]
                 for start, end in sequence_parts:
                     design[start:end] = self.target.local_target[start:end]
                 self.design = _Design(primary=''.join(design))
@@ -507,40 +545,20 @@ gc control
 
             for start, end in folding_parts:
                 distance +=  hamming(folding[start:end], self.target.local_target[start:end])
-                if not self._env_config.sequence_reward:
-                    normalized_distance = (distance / len(self.target))
-
-                    episode_info = EpisodeInfo(
-                    target_id=self.target.id,
-                    time=time.time(),
-                    normalized_hamming_distance=normalized_distance,
-                    )
-                    self.episodes_info.append(episode_info)
-
-                    if distance == 0:
-                        return 1.0
-
-                    return (1 - normalized_distance) ** self._env_config.reward_exponent
-
-
-
-            if self._env_config.sequence_reward:
-                for start, end in sequence_parts:
-                    distance += hamming(self.design.primary[start:end], self.target.local_target[start:end])
-
             normalized_distance = (distance / len(self.target))
 
             episode_info = EpisodeInfo(
-                target_id=self.target.id,
-                time=time.time(),
-                normalized_hamming_distance=normalized_distance,
+            target_id=self.target.id,
+            time=time.time(),
+            normalized_hamming_distance=normalized_distance,
             )
             self.episodes_info.append(episode_info)
 
-
             if distance == 0:
                 return 1.0
+
             return (1 - normalized_distance) ** self._env_config.reward_exponent
+
 
     def execute(self, actions):
         """
@@ -556,7 +574,7 @@ gc control
         """
         self._apply_action(actions)
 
-        terminal = self.design.first_unassigned_site is None
+        terminal = self.design.first_unassigned_site is None if not self._env_config.reward_function == 'structure_only' else all([x is None for x in self.target.structure_parts_encoding])
         state = None if terminal else self._get_state()
         reward = self._get_reward(terminal)
 

@@ -149,13 +149,19 @@ if __name__ == "__main__":
     parser.add_argument(
         "--num_lstm_layers", type=int, default=0, help="Number of lstm layers"
     )
-    parser.add_argument("--gc_tolerance", default=0.04, type=float, help="The tolerance of the gc-content")
-    parser.add_argument("--desired_gc", default=0.5, type=float, help="The desired gc-content of the solution")
-    parser.add_argument("--gc_improvement_step", action="store_true", help="Control the gc-content of the solution")
-    parser.add_argument("--gc_postprocessing", action="store_true", help="Control gc-content only via postprocessing")
-    parser.add_argument("--gc_reward", action="store_true", help="Include gc-content into reward function")
-    parser.add_argument("--gc_weight", default=1.0, type=float, help="The weighting factor for the gc-content constraint")
-    parser.add_argument("--structural_weight", default=1.0, type=float, help="The weighting factor for the structural constraint")
+    # parser.add_argument("--gc_tolerance", default=0.04, type=float, help="The tolerance of the gc-content")
+    # parser.add_argument("--desired_gc", default=0.5, type=float, help="The desired gc-content of the solution")
+    # parser.add_argument("--gc_improvement_step", action="store_true", help="Control the gc-content of the solution")
+    # parser.add_argument("--gc_postprocessing", action="store_true", help="Control gc-content only via postprocessing")
+    # parser.add_argument("--gc_reward", action="store_true", help="Include gc-content into reward function")
+    # parser.add_argument("--gc_weight", default=1.0, type=float, help="The weighting factor for the gc-content constraint")
+    # parser.add_argument("--structural_weight", default=1.0, type=float, help="The weighting factor for the structural constraint")
+    parser.add_argument("--sequence_reward", action="store_true", help="Decide if hamming distance is computed based on the folding only or also on the sequence parts")
+    # parser.add_argument("--training_data", default="random", type=str, help="Choose the training data for local design: random sequences, motif based sequences")
+    parser.add_argument("--local_design", action="store_true", help="Choose if agent should do RNA local Design")
+    parser.add_argument("--predict_pairs", action="store_true", help="Choose if Actions are used to directly predict watson-crick base pairs")
+    parser.add_argument("--structure_only", action="store_true", help="Choose if state only considers structure parts of the target")
+
 
 
     args = parser.parse_args()
@@ -174,19 +180,33 @@ if __name__ == "__main__":
         mutation_threshold=args.mutation_threshold,
         reward_exponent=args.reward_exponent,
         state_radius=args.state_radius,
-        gc_tolerance=args.gc_tolerance,
-        desired_gc=args.desired_gc,
-        gc_improvement_step=args.gc_improvement_step,
-        gc_postprocessing=args.gc_postprocessing,
-        gc_weight=args.gc_weight,
-        structural_weight=args.structural_weight,
-        gc_reward=args.gc_reward,
+        # gc_tolerance=args.gc_tolerance,
+        # desired_gc=args.desired_gc,
+        # gc_improvement_step=args.gc_improvement_step,
+        # gc_postprocessing=args.gc_postprocessing,
+        # gc_weight=args.gc_weight,
+        # structural_weight=args.structural_weight,
+        # gc_reward=args.gc_reward,
+        local_design=args.local_design,
+        # num_actions=args.num_actions,
+        # keep_sequence=args.keep_sequence,
+        sequence_reward=args.sequence_reward,
+        predict_pairs=args.predict_pairs,
+        structure_only=args.structure_only,
+        # training_data=args.training_data,
     )
     dot_brackets = parse_dot_brackets(
         dataset=args.dataset,
         data_dir=args.data_dir,
         target_structure_ids=args.target_structure_ids,
     )
+    if args.local_design:
+        dot_brackets = parse_local_design_data(
+            dataset=args.dataset,
+            data_dir=args.data_dir,
+            target_structure_ids=args.target_structure_ids,
+        )
+
     learn_to_design_rna(
         dot_brackets,
         timeout=args.timeout,

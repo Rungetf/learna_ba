@@ -126,19 +126,21 @@ experiment-test:
 	--conv_channels 7 18 \
 	--embedding_size 3 \
  	--entropy_regularization 6.762991409135427e-05 \
-  	--fc_units 57 \
-  	--learning_rate 0.001 \
-  	--lstm_units 28 \
-  	--num_fc_layers 1 \
-  	--num_lstm_layers 1 \
-  	--reward_exponent 9.33503385734547 \
-  	--state_radius 32 \
-  	--restart_timeout 1800 \
+  --fc_units 57 \
+  --learning_rate 0.001 \
+  --lstm_units 28 \
+  --num_fc_layers 1 \
+  --num_lstm_layers 1 \
+  --reward_exponent 9.33503385734547 \
+  --state_radius 32 \
+  --restart_timeout 1800 \
 	--dataset rfam_local_test \
 	--data_dir data \
-	--target_structure_ids 100 \
 	--local_design \
+	--reward_function 'sequence_and_structure' \
+	--target_structure_ids 3 \
 	--timeout 1800
+	# --predict_pairs \
 	# --keep_sequence fully \
 	# --training_data random \
 	# --num_actions 4 \
@@ -172,14 +174,16 @@ meta-learna-test:
 	--num_lstm_layers 0 \
 	--reward_exponent 8.932893783628236 \
 	--state_radius 29 \
-	--gc_improvement_step \
-	--gc_reward \
-	--desired_gc 0.1 \
-	--gc_weight 1 \
-	--gc_tolerance 0.01 \
-	--target_structure_path data/eterna/2.rna \
+	--dataset rfam_local_test \
+	--data_dir data \
+	--local_design \
+	--structure_only \
+	--target_structure_ids 1 \
 	--restore_path models/ICLR_2019/224_0_1 \
-	--stop_learning > ../../test_results/eterna/Meta-LEARNA/run-plot/2_plot_run_gc_01.out
+	--stop_learning
+	# --predict_pairs \
+	# --timeout 1800 \
+	# > ../../test_results/eterna/Meta-LEARNA/run-plot/2_plot_run_gc_01.out
 
 
 ## Local Meta-LEARNA experiment with GC-control

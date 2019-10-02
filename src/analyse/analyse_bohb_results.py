@@ -1,6 +1,10 @@
 import matplotlib.pyplot as plt
 import hpbandster.core.result as hpres
 import hpbandster.visualization as hpvis
+from src.optimization.learna_worker import LearnaWorker
+from fanova import fANOVA
+import fanova.visualizer
+from pathlib import Path
 
 
 def analyse_bohb_run(run):
@@ -28,36 +32,74 @@ def analyse_bohb_run(run):
     inc_config = id2conf[inc_id]['config']
     inc_test_loss = inc_run.info['validation_info']
 
-    print('Best found configuration:')
-    print(inc_config)
+    # print(f"validation info of inc: {inc_test_loss}")
+
+    # # Let's plot the observed losses grouped by budget,
+    # hpvis.losses_over_time(all_runs)
+
+    # # the number of concurent runs,
+    # hpvis.concurrent_runs_over_time(all_runs)
+
+    # # and the number of finished runs.
+    # hpvis.finished_runs_over_time(all_runs)
+
+    # # This one visualizes the spearman rank correlation coefficients of the losses
+    # # between different budgets.
+    # hpvis.correlation_across_budgets(result)
+
+    # # For model based optimizers, one might wonder how much the model actually helped.
+    # # The next plot compares the performance of configs picked by the model vs. random ones
+    # hpvis.performance_histogram_model_vs_random(all_runs, id2conf)
+
+    # plt.show()
+
+    # # df = result.get_pandas_dataframe()
+    # print(df)
+
+    min_solved = 80
+
+    all_solved = [(x.info['validation_info']['num_solved'], x.config_id, id2conf[x.config_id]['config']) for x in all_runs if x.info and int(x.info['validation_info']['num_solved']) >= min_solved]
+    # # print(all_solved)
+    all_solved_sorted = sorted(all_solved, key=lambda x: x[0], reverse=True)
+
+    # print(f"{len(all_solved_sorted)} configurations solved at least {min_solved} targets:")
+
+    # for index, i in enumerate(all_solved_sorted):
+    #     print(f"[{index + 1}]")
+    #     print(str(i) + '\n')
+
+    print(all_solved)
+    # print('\n')
+    # print('Incumbent:')
+    # print(inc_config)
     # print('It achieved accuracies of %f (validation) and %f (test).'%(1-inc_loss, inc_test_loss))
-    print(f"validation info of inc: {inc_test_loss}")
+    # worker = LearnaWorker('', 1, [], run_id='analyse')
+    # cs = worker.get_configspace()
+    # fanova = result.get_fANOVA_data(cs)
+    # f = fANOVA(fanova)
 
-    # Let's plot the observed losses grouped by budget,
-    hpvis.losses_over_time(all_runs)
+    # print(fanova)
 
-    # the number of concurent runs,
-    hpvis.concurrent_runs_over_time(all_runs)
+    worker = LearnaWorker('', 1, [], run_id='analyse')
+    cs = worker.get_configspace()
+    # r = result.get_fANOVA_data(cs)
+    print('generate fanova data')
+    a, b, _ = result.get_fANOVA_data(cs)
+    print('create fanova object')
+    f = fANOVA(a, b, cs)
 
-    # and the number of finished runs.
-    hpvis.finished_runs_over_time(all_runs)
-
-    # This one visualizes the spearman rank correlation coefficients of the losses
-    # between different budgets.
-    hpvis.correlation_across_budgets(result)
-
-    # For model based optimizers, one might wonder how much the model actually helped.
-    # The next plot compares the performance of configs picked by the model vs. random ones
-    hpvis.performance_histogram_model_vs_random(all_runs, id2conf)
-
-    plt.show()
-
-    # pd = result.get_pandas_dataframe()
-    # print(pd)
-
-    # all_solved = [(x.info['validation_info']['num_solved'], y.loss) for x in all_runs for y in all_runs]
-    # print(all_solved)
-    # print(sorted(all_solved, key=lambda x: x[0]))
+    # getting the 10 most important pairwise marginals sorted by importance
+    # best_margs = f.get_most_important_pairwise_marginals(n=10)
+    # print(best_margs)
+    print('create visualizer')
+    path = Path('results', 'fanova')
+    path.mkdir(parents=True, exist_ok=True)
+    vis = fanova.visualizer.Visualizer(f, cs, directory=path)
+    # # creating the plot of pairwise marginal:
+    # vis.plot_pairwise_marginal((0,2), resolution=20)
+    # creating all plots in the directory
+    print('generate plots')
+    vis.create_most_important_pairwise_marginal_plots(n=12)
 
 if __name__ == '__main__':
     import argparse

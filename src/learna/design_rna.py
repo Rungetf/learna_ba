@@ -172,9 +172,11 @@ if __name__ == "__main__":
     # parser.add_argument("--gc_weight", default=1.0, type=float, help="The weighting factor for the gc-content constraint")
     # parser.add_argument("--num_actions", default=4, type=int, help="The number of actions that the agent chooses from")
     # parser.add_argument("--keep_sequence", default="fully", type=str, help="How much of the sequence of targets for local design is kept: fully, partially, no")
-    parser.add_argument("--sequence_reward", action="store_true", help="Decide if hamming distance is computed based on the folding only or also on the sequence parts")
+    parser.add_argument("--reward_function", type=str, default='structure_only', help="Decide if hamming distance is computed based on the folding only or also on the sequence parts")
     # parser.add_argument("--training_data", default="random", type=str, help="Choose the training data for local design: random sequences, motif based sequences")
     parser.add_argument("--local_design", action="store_true", help="Choose if agent should do RNA local Design")
+    parser.add_argument("--predict_pairs", action="store_true", help="Choose if Actions are used to directly predict watson-crick base pairs")
+    # parser.add_argument("--structure_only", action="store_true", help="Choose if state only considers structure parts of the target")
 
 
     args = parser.parse_args()
@@ -206,7 +208,10 @@ if __name__ == "__main__":
         local_design=args.local_design,
         # num_actions=args.num_actions,
         # keep_sequence=args.keep_sequence,
-        sequence_reward=args.sequence_reward,
+        # sequence_reward=args.sequence_reward,
+        reward_function=args.reward_function,
+        predict_pairs=args.predict_pairs,
+        # structure_only=args.structure_only,
         # training_data=args.training_data,
     )
     dot_brackets = parse_dot_brackets(

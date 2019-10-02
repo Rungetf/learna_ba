@@ -72,7 +72,9 @@ class LearnaWorker(Worker):
             reward_exponent=config["reward_exponent"],
             state_radius=config["state_radius"],
             local_design=config["local_design"],
-            sequence_reward=bool(config["sequence_reward"]),
+            # sequence_reward=bool(config["sequence_reward"]),
+            reward_function=config["reward_function"],
+            predict_pairs=config["predict_pairs"],
             # gc_weight=config["gc_weight"],
             # structural_weight=config["structural_weight"],
             # desired_gc=config["desired_gc"],
@@ -250,9 +252,21 @@ class LearnaWorker(Worker):
             )
         )
 
+        # config_space.add_hyperparameter(
+        #     CS.UniformIntegerHyperparameter(
+        #         "sequence_reward", lower=0, upper=1, default_value=0
+        #     )
+        # )
+
+        config_space.add_hyperparameter(
+            CS.CategoricalHyperparameter(
+                "reward_function", choices=['sequence and structure', 'structure_replace_sequence', 'structure_only']
+            )
+        )
+
         config_space.add_hyperparameter(
             CS.UniformIntegerHyperparameter(
-                "sequence_reward", lower=0, upper=1, default_value=0
+                "predict_pairs", lower=0, upper=1, default_value=1
             )
         )
 

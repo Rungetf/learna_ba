@@ -17,6 +17,7 @@ thirdparty/eastman/src/
 thirdparty/eastman/best_model/
 thirdparty/eastman/solve_one_puzzle.py
 thirdparty/miniconda/miniconda/
+thirdparty/fanova/
 
 # results
 results/*

@@ -1,0 +1,4 @@
+6493747  -> learna first bohb run 30 min max budget on rfam-local-validation  -> failed after 24h to sample new configs, wrong parameter (float) for sequence reward
+6493755  -> meta learna first bohb run max 1h budget 1 min validation
+
+6511133  -> restart learna 2 day optimization for sequence reward decision, changed logging to warning, changed float parameter for sequence_reward to integer between 0, 1. should work now
