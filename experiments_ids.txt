@@ -2,3 +2,5 @@
 6493755  -> meta learna first bohb run max 1h budget 1 min validation
 
 6511133  -> restart learna 2 day optimization for sequence reward decision, changed logging to warning, changed float parameter for sequence_reward to integer between 0, 1. should work now
+
+6538937  -> First autoRL bohb-run with num_solved objective; 4 days 1000 cores; no sequence output; searches over action-semantics, 3 reward functions, state space (also via reward functions)  

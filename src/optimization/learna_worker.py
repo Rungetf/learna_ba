@@ -88,7 +88,7 @@ class LearnaWorker(Worker):
 
         return {
             # "loss": validation_info["sum_of_min_distances"],
-            "loss": validation_info["num_solved"],
+            "loss": validation_info["num_unsolved"],
             # "loss": validation_info["sum_of_min_deltas_and_distances"],
             "info": {"validation_info": validation_info},
         }
@@ -123,6 +123,7 @@ class LearnaWorker(Worker):
         evaluation_sum_of_min_distances = 0
         evaluation_sum_of_first_distances = 0
         evaluation_num_solved = 0
+        evaluation_num_unsolved = 0
         # evaluation_sum_of_min_gc_deltas = 0
         # evaluation_sum_of_min_gc_deltas_and_distances = 0
 
@@ -142,6 +143,7 @@ class LearnaWorker(Worker):
             # evaluation_sum_of_min_gc_deltas_and_distances += deltas_and_distances.min()
 
             evaluation_num_solved += dists.min() == 0.0
+            evaluation_num_unsolved += dists.min() != 0
 
             evaluation_sequence_infos[sequence_id] = {
                 "num_episodes": len(r),
@@ -156,6 +158,7 @@ class LearnaWorker(Worker):
 
         evaluation_info = {
             "num_solved": int(evaluation_num_solved),
+            "num_unsolved": int(evaluation_num_unsolved),
             "sum_of_min_distances": float(evaluation_sum_of_min_distances),
             "sum_of_first_distances": float(evaluation_sum_of_first_distances),
             # "sum_of_min_gc_deltas": float(evaluation_sum_of_min_gc_deltas),
