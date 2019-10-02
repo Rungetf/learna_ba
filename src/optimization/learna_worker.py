@@ -260,7 +260,7 @@ class LearnaWorker(Worker):
 
         config_space.add_hyperparameter(
             CS.CategoricalHyperparameter(
-                "reward_function", choices=['sequence and structure', 'structure_replace_sequence', 'structure_only']
+                "reward_function", choices=['sequence_and_structure', 'structure_replace_sequence', 'structure_only']
             )
         )
 
