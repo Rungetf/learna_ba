@@ -256,8 +256,8 @@ class MetaLearnaWorker(Worker):
         config_space.add_hyperparameter(
             CS.UniformFloatHyperparameter(
                 "entropy_regularization",
-                lower=5e-7,  # FR: changed entropy regularization lower from 1e-5 to 1e-7, ICLR: LEARNA (6,76e-5), Meta-LEARNA (151e-4)
-                upper=5e-2,  # FR: changed entropy regularization upper from 1e-3 to 1e-2, ICLR: LEARNA (6,76e-5), Meta-LEARNA (151e-4)
+                lower=1e-7,  # FR: changed entropy regularization lower from 1e-5 to 1e-7, ICLR: LEARNA (6,76e-5), Meta-LEARNA (151e-4)
+                upper=1e-2,
                 log=True,
                 default_value=1.5e-3,
             )

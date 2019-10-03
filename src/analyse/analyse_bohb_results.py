@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import hpbandster.core.result as hpres
 import hpbandster.visualization as hpvis
-from src.optimization.learna_worker import LearnaWorker
+from src.optimization.meta_learna_worker import MetaLearnaWorker
 from fanova import fANOVA
 import fanova.visualizer
 from pathlib import Path
@@ -80,7 +80,7 @@ def analyse_bohb_run(run):
 
     # print(fanova)
 
-    worker = LearnaWorker('', 1, [], run_id='analyse')
+    worker = MetaLearnaWorker('', 1, [], run_id='analyse')
     cs = worker.get_configspace()
     # r = result.get_fANOVA_data(cs)
     print('generate fanova data')
@@ -92,14 +92,28 @@ def analyse_bohb_run(run):
     # best_margs = f.get_most_important_pairwise_marginals(n=10)
     # print(best_margs)
     print('create visualizer')
-    path = Path('results', 'fanova')
+    path = Path('results', 'fanova_test')
     path.mkdir(parents=True, exist_ok=True)
     vis = fanova.visualizer.Visualizer(f, cs, directory=path)
     # # creating the plot of pairwise marginal:
     # vis.plot_pairwise_marginal((0,2), resolution=20)
     # creating all plots in the directory
     print('generate plots')
-    vis.create_most_important_pairwise_marginal_plots(n=12)
+    vis.create_most_important_pairwise_marginal_plots(n=2)
+    # vis.plot_marginal(1)
+    # vis.plot_marginal(2)
+    # vis.plot_marginal(3)
+    # vis.plot_marginal(4)
+    # vis.plot_marginal(5)
+    # vis.plot_marginal(6)
+    # vis.plot_marginal(7)
+    # vis.plot_marginal(8)
+    # vis.plot_marginal(9)
+    # vis.plot_marginal(10)
+    # vis.plot_marginal(11)
+    # vis.plot_marginal(12)
+    # vis.plot_marginal(13)
+    # vis.plot_marginal(14)
 
 if __name__ == '__main__':
     import argparse
