@@ -35,3 +35,19 @@ plots*
 # misc
 *__pycache__/
 .pytest_cache/
+
+# latex
+reports/thesis/thesis_main.aux
+reports/thesis/thesis_main.bbl
+reports/thesis/thesis_main.blg
+reports/thesis/thesis_main.fdb_latexmk
+reports/thesis/thesis_main.fls
+reports/thesis/thesis_main.loa
+reports/thesis/thesis_main.lof
+reports/thesis/thesis_main.log
+reports/thesis/thesis_main.lot
+reports/thesis/thesis_main.out
+reports/thesis/thesis_main.pdf
+reports/thesis/thesis_main.synctex.gz
+reports/thesis/thesis_main.toc
+reports/thesis/out/thesis_main.*
