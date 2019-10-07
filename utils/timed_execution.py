@@ -50,7 +50,7 @@ if __name__ == "__main__":
     run_path = Path(
         args.results_dir, args.experiment_group, args.dataset, args.method, f"run-{run}"
     )
-    sequence_path = Path(args.data_dir, args.dataset, f"{target_id}.rna")
+    sequence_path = Path(args.data_dir, args.dataset, f"{target_id}.rna") if not args.method == 'antarna_local' else Path(args.data_dir, args.dataset, f"{target_id}.anta")
 
     limited_execution = pynisher.enforce_limits(cpu_time_in_s=args.timeout)(execution)
     limited_execution(args.method, sequence_path, run_path, target_id)

@@ -49,10 +49,12 @@ requirements-vienna:
 experiment-test:
 	@source activate antarna && \
 	python src/antaRNA_v114.py \
-	  -Cstr "AGCGCU...(((.....)))...(((((......))..)))..ACGUCGGG" \
+	  -Cstr ".(((....)))((((((((......((((.(((((...))))))))))))..)))))((((......))))." \
 		-tGC 0.5 \
+		-Cseq "UGUCAAGUGGCUCAGANNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNCCCUGGUUCGGGAA" \
 		-n 1 \
 		-noLBP \
+		-noGU \
 		-r 2147483647 \
 		-t 2147483647 \
 		-Cgcw 0.0 \

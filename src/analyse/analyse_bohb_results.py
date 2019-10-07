@@ -1,7 +1,8 @@
+import numpy as np
 import matplotlib.pyplot as plt
 import hpbandster.core.result as hpres
 import hpbandster.visualization as hpvis
-from src.optimization.meta_learna_worker import MetaLearnaWorker
+from src.optimization.learna_worker import LearnaWorker
 from fanova import fANOVA
 import fanova.visualizer
 from pathlib import Path
@@ -34,7 +35,7 @@ def analyse_bohb_run(run):
 
     # print(f"validation info of inc: {inc_test_loss}")
 
-    # # Let's plot the observed losses grouped by budget,
+    # Let's plot the observed losses grouped by budget,
     # hpvis.losses_over_time(all_runs)
 
     # # the number of concurent runs,
@@ -53,22 +54,25 @@ def analyse_bohb_run(run):
 
     # plt.show()
 
-    # # df = result.get_pandas_dataframe()
+    # df = result.get_pandas_dataframe()
     # print(df)
 
-    min_solved = 80
+    min_solved = 1
 
     all_solved = [(x.info['validation_info']['num_solved'], x.config_id, id2conf[x.config_id]['config']) for x in all_runs if x.info and int(x.info['validation_info']['num_solved']) >= min_solved]
     # # print(all_solved)
     all_solved_sorted = sorted(all_solved, key=lambda x: x[0], reverse=True)
 
-    # print(f"{len(all_solved_sorted)} configurations solved at least {min_solved} targets:")
+    print(f"{len(all_solved_sorted)} configurations solved at least {min_solved} targets:")
 
-    # for index, i in enumerate(all_solved_sorted):
-    #     print(f"[{index + 1}]")
-    #     print(str(i) + '\n')
+    print(f"Most solving config: {all_solved_sorted[0][1]}")
+    print('batch\tc_channels1\tc_channels2\tc_radius1\tc_radius2\tembedding\tentropy\tfc_units\tlearning_rate\tlstm_units\tfc_layers\tlstm_layers\tpairs\talpha\treward_f\ts_radius')
+    for index, i in enumerate(all_solved_sorted[:10]):
+        # print(f"[{index + 1}]")
+        # print(str(i) + '\n')
+        print(f"{i[2]['batch_size']}\t{i[2]['conv_channels1']}\t{i[2]['conv_channels2']}\t{i[2]['conv_radius1']}\t{i[2]['conv_radius2']}\t{i[2]['embedding_size']}\t{i[2]['entropy_regularization']}\t{i[2]['fc_units']}\t{i[2]['learning_rate']}\t{i[2]['lstm_units']}\t{i[2]['num_fc_layers']}\t{i[2]['num_lstm_layers']}\t{i[2]['predict_pairs']}\t{i[2]['reward_exponent']}\t{i[2]['reward_function']}\t{i[2]['state_radius_relative']}")
 
-    print(all_solved)
+    # print(all_solved)
     # print('\n')
     # print('Incumbent:')
     # print(inc_config)
@@ -80,26 +84,27 @@ def analyse_bohb_run(run):
 
     # print(fanova)
 
-    worker = MetaLearnaWorker('', 1, [], run_id='analyse')
-    cs = worker.get_configspace()
-    # r = result.get_fANOVA_data(cs)
-    print('generate fanova data')
-    a, b, _ = result.get_fANOVA_data(cs)
-    print('create fanova object')
-    f = fANOVA(a, b, cs)
+    # worker = LearnaWorker('', 1, [], run_id='analyse')
+    # cs = worker.get_configspace()
+    # # r = result.get_fANOVA_data(cs)
+    # print('generate fanova data')
+    # a, b, _ = result.get_fANOVA_data(cs)
+    # b = np.array([np.float64(x) for x in b])
+    # print('create fanova object')
+    # f = fANOVA(a, b, cs)
 
-    # getting the 10 most important pairwise marginals sorted by importance
-    # best_margs = f.get_most_important_pairwise_marginals(n=10)
-    # print(best_margs)
-    print('create visualizer')
-    path = Path('results', 'fanova_test')
-    path.mkdir(parents=True, exist_ok=True)
-    vis = fanova.visualizer.Visualizer(f, cs, directory=path)
-    # # creating the plot of pairwise marginal:
-    # vis.plot_pairwise_marginal((0,2), resolution=20)
-    # creating all plots in the directory
-    print('generate plots')
-    vis.create_most_important_pairwise_marginal_plots(n=2)
+    # # getting the 10 most important pairwise marginals sorted by importance
+    # # best_margs = f.get_most_important_pairwise_marginals(n=10)
+    # # print(best_margs)
+    # print('create visualizer')
+    # path = Path('results', 'fanova_test')
+    # path.mkdir(parents=True, exist_ok=True)
+    # vis = fanova.visualizer.Visualizer(f, cs, directory=path)
+    # # # creating the plot of pairwise marginal:
+    # # vis.plot_pairwise_marginal((0,2), resolution=20)
+    # # creating all plots in the directory
+    # print('generate plots')
+    # # vis.create_most_important_pairwise_marginal_plots(n=2)
     # vis.plot_marginal(1)
     # vis.plot_marginal(2)
     # vis.plot_marginal(3)
@@ -114,6 +119,8 @@ def analyse_bohb_run(run):
     # vis.plot_marginal(12)
     # vis.plot_marginal(13)
     # vis.plot_marginal(14)
+    # vis.plot_marginal(15)
+    # vis.plot_marginal(16)
 
 if __name__ == '__main__':
     import argparse

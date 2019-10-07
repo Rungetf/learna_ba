@@ -94,6 +94,10 @@ data-rfam-learn:
 	mv data/rfam_learn/train data/rfam_learn_train
 	rm -rf data/rfam_learn
 
+antarna-data:
+	@source activate learna && \
+	python -m src.data.generate_anta_data --data_path data/rfam_local_test
+
 
 
 ################################################################################
@@ -213,7 +217,16 @@ meta-learna-adapt-test:
 	--restore_path models/ICLR_2019/224_0_1 \
 	--restart_timeout 1800 > ../../test_results/eterna/Meta-LEARNA-Adapt/run-plot/2_plot_run_gc_01.out
 
-
+test-timed-execution-%:
+	@source activate learna && \
+	python utils/timed_execution.py \
+		--timeout 3600 \
+		--data_dir data/ \
+		--results_dir results/ \
+		--experiment_group test_anta_local \
+		--method antarna_local \
+		--dataset rfam_local_test \
+		--task_id $*
 
 ################################################################################
 # Run experiments on Nemo cluster
