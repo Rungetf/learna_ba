@@ -96,7 +96,7 @@ data-rfam-learn:
 
 antarna-data:
 	@source activate learna && \
-	python -m src.data.generate_anta_data --data_path data/rfam_local_test
+	python -m src.data.generate_anta_data --data_path data --dataset rfam_local_test
 
 
 
@@ -253,6 +253,16 @@ nemo-rfam-taneda-%:
 		-v DATASET=rfam_taneda \
 		-v TIMEOUT=600 \
 		-v EXPERIMENT_GROUP=thesis_LEARNA_gc_01
+
+## Start experiment on the Rfam Taneda benchmark
+nemo-rna-local-%:
+	msub utils/rna_local.moab \
+		-l walltime=6000 \
+		-t 1-500 \
+		-v METHOD=$* \
+		-v DATASET=rfam_local_test \
+		-v TIMEOUT=3600 \
+		-v EXPERIMENT_GROUP=rna_local_design
 
 
 ################################################################################
