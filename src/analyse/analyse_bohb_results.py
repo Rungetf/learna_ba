@@ -67,9 +67,10 @@ def analyse_bohb_run(run):
 
     print(f"Most solving config: {all_solved_sorted[0][1]}")
     print('batch\tc_channels1\tc_channels2\tc_radius1\tc_radius2\tembedding\tentropy\tfc_units\tlearning_rate\tlstm_units\tfc_layers\tlstm_layers\tpairs\talpha\treward_f\ts_radius')
+    # for index, i in enumerate(all_solved_sorted[:10]):
     for index, i in enumerate(all_solved_sorted[:10]):
         # print(f"[{index + 1}]")
-        # print(str(i) + '\n')
+        print(str(i) + '\n')
         print(f"{i[2]['batch_size']}\t{i[2]['conv_channels1']}\t{i[2]['conv_channels2']}\t{i[2]['conv_radius1']}\t{i[2]['conv_radius2']}\t{i[2]['embedding_size']}\t{i[2]['entropy_regularization']}\t{i[2]['fc_units']}\t{i[2]['learning_rate']}\t{i[2]['lstm_units']}\t{i[2]['num_fc_layers']}\t{i[2]['num_lstm_layers']}\t{i[2]['predict_pairs']}\t{i[2]['reward_exponent']}\t{i[2]['reward_function']}\t{i[2]['state_radius_relative']}")
 
     # print(all_solved)
