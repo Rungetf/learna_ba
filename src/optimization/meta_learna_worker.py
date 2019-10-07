@@ -83,7 +83,9 @@ class MetaLearnaWorker(Worker):
             reward_exponent=config["reward_exponent"],
             state_radius=config["state_radius"],
             local_design=config["local_design"],
-            sequence_reward=bool(config["sequence_reward"]),
+            # sequence_reward=bool(config["sequence_reward"]),
+            reward_function=config["reward_function"],
+            predict_pairs=config["predict_pairs"],
             # gc_weight=config["gc_weight"],
             # structural_weight=config["structural_weight"],
             # desired_gc=config["desired_gc"],
@@ -108,7 +110,7 @@ class MetaLearnaWorker(Worker):
             raise
 
         return {
-            "loss": validation_info["sum_of_min_distances"],
+            "loss": validation_info["num_unsolved"],
             # "loss": validation_info["sum_of_min_deltas_and_distances"],
             "info": {"train_info": train_info, "validation_info": validation_info},
         }
@@ -137,6 +139,7 @@ class MetaLearnaWorker(Worker):
         train_sum_of_min_distances = 0
         train_sum_of_last_distances = 0
         train_num_solved = 0
+        train_num_unsolved = 0
 
         for r in train_results.values():
             sequence_id = r[0].target_id
@@ -148,6 +151,7 @@ class MetaLearnaWorker(Worker):
             train_sum_of_last_distances += dists[-1]
 
             train_num_solved += dists.min() == 0.0
+            train_num_unsolved += dists.min() != 0.0
 
             train_sequence_infos[sequence_id] = {
                 "num_episodes": len(r),
@@ -157,6 +161,7 @@ class MetaLearnaWorker(Worker):
 
         train_info = {
             "num_solved": int(train_num_solved),
+            "num_unsolved": int(train_num_unsolved),
             "sum_of_min_distances": float(train_sum_of_min_distances),
             "sum_of_last_distances": float(train_sum_of_last_distances),
             "squence_infos": train_sequence_infos,
@@ -195,6 +200,7 @@ class MetaLearnaWorker(Worker):
         evaluation_sum_of_min_distances = 0
         evaluation_sum_of_first_distances = 0
         evaluation_num_solved = 0
+        evaluation_num_unsolved = 0
         # evaluation_sum_of_min_gc_deltas = 0
         # evaluation_sum_of_min_gc_deltas_and_distances = 0
 
@@ -215,6 +221,7 @@ class MetaLearnaWorker(Worker):
             # evaluation_sum_of_min_gc_deltas_and_distances += deltas_and_distances.min()
 
             evaluation_num_solved += dists.min() == 0.0
+            evaluation_num_unsolved += dists.min() != 0.0
 
             evaluation_sequence_infos[sequence_id] = {
                 "num_episodes": len(r),
@@ -229,6 +236,7 @@ class MetaLearnaWorker(Worker):
 
         evaluation_info = {
             "num_solved": int(evaluation_num_solved),
+            "num_unsolved": int(evaluation_num_unsolved),
             "sum_of_min_distances": float(evaluation_sum_of_min_distances),
             "sum_of_first_distances": float(evaluation_sum_of_first_distances),
             # "sum_of_min_gc_deltas": float(evaluation_sum_of_min_gc_deltas),
@@ -245,7 +253,7 @@ class MetaLearnaWorker(Worker):
         # parameters for PPO here
         config_space.add_hyperparameter(
             CS.UniformFloatHyperparameter(
-                "learning_rate", lower=1e-6, upper=1e-3, log=True, default_value=1e-5  # FR: Changed learning_rate upper from 1e-4 to 1e-3
+                "learning_rate", lower=1e-6, upper=1e-3, log=True, default_value=5e-4  # FR: changed learning rate lower from 1e-5 to 1e-6, ICLR: Learna (5,99e-4), Meta-LEARNA (6.44e-5)
             )
         )
         config_space.add_hyperparameter(
@@ -262,11 +270,13 @@ class MetaLearnaWorker(Worker):
                 default_value=1.5e-3,
             )
         )
+
         config_space.add_hyperparameter(
             CS.UniformFloatHyperparameter(
                 "reward_exponent", lower=1, upper=12, default_value=1  # FR: changed reward_exponent upper from 10 to 12, ICLR: Learna (9.34), Meta-LEARNA (8.93)
             )
         )
+
         config_space.add_hyperparameter(
             CS.UniformFloatHyperparameter(
                 "state_radius_relative", lower=0, upper=1, default_value=0
@@ -281,7 +291,7 @@ class MetaLearnaWorker(Worker):
         )
         config_space.add_hyperparameter(
             CS.UniformIntegerHyperparameter(
-                "conv_channels1", lower=1, upper=32, log=False, default_value=16
+                "conv_channels1", lower=1, upper=32, log=True, default_value=32
             )
         )
 
@@ -292,13 +302,13 @@ class MetaLearnaWorker(Worker):
         )
         config_space.add_hyperparameter(
             CS.UniformIntegerHyperparameter(
-                "conv_channels2", lower=1, upper=32, log=False, default_value=1
+                "conv_channels2", lower=1, upper=32, log=True, default_value=1
             )
         )
 
         config_space.add_hyperparameter(
             CS.UniformIntegerHyperparameter(
-                "num_fc_layers", lower=1, upper=2, default_value=1
+                "num_fc_layers", lower=1, upper=2, default_value=2
             )
         )
         config_space.add_hyperparameter(
@@ -325,8 +335,14 @@ class MetaLearnaWorker(Worker):
         )
 
         config_space.add_hyperparameter(
-         CS.UniformIntegerHyperparameter(
-             "sequence_reward", lower=0, upper=1, default_value=0
+            CS.CategoricalHyperparameter(
+                "reward_function", choices=['sequence_and_structure', 'structure_replace_sequence', 'structure_only']
+            )
+        )
+
+        config_space.add_hyperparameter(
+            CS.UniformIntegerHyperparameter(
+                "predict_pairs", lower=0, upper=1, default_value=1
             )
         )
 
@@ -360,6 +376,7 @@ class MetaLearnaWorker(Worker):
                 + (max_state_radius - min_state_radius) * config["state_radius_relative"]
             )
             del config["state_radius_relative"]
+
         # config["desired_gc"] = np.random.choice([.1, .2, .3, .4, .5, .6, .7, .8, .9])
         config["restart_timeout"] = None
         config["local_design"] = True

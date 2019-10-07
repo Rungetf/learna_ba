@@ -9,4 +9,5 @@ OPTIMIZATION:
 
 
 EVALUATION:
-6575407 --> antarna on rfam_local_test: 3600 timeout, 5 attempts, 
+6575407 --> antarna on rfam_local_test: 3600 timeout, 5 attempts,
+6576423 --> autoLEARNA_local best config from 4 day learna autoRL run on rfam_local_test: 3600 timeout, 5 attempts 

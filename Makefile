@@ -281,7 +281,7 @@ bohb-example:
 		--data_dir data \
 		--nic_name lo \
 		--shared_directory results/ \
-		--mode learna
+		--mode meta_learna
 
 ################################################################################
 # Analysis and Visualization
