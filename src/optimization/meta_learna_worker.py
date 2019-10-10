@@ -110,7 +110,7 @@ class MetaLearnaWorker(Worker):
             raise
 
         return {
-            "loss": validation_info["num_unsolved"],
+            "loss": validation_info["sum_of_min_distances"],
             # "loss": validation_info["sum_of_min_deltas_and_distances"],
             "info": {"train_info": train_info, "validation_info": validation_info},
         }
@@ -334,17 +334,17 @@ class MetaLearnaWorker(Worker):
             )
         )
 
-        config_space.add_hyperparameter(
-            CS.CategoricalHyperparameter(
-                "reward_function", choices=['sequence_and_structure', 'structure_replace_sequence', 'structure_only']
-            )
-        )
+        # config_space.add_hyperparameter(
+        #     CS.CategoricalHyperparameter(
+        #         "reward_function", choices=['sequence_and_structure', 'structure_replace_sequence', 'structure_only']
+        #     )
+        # )
 
-        config_space.add_hyperparameter(
-            CS.UniformIntegerHyperparameter(
-                "predict_pairs", lower=0, upper=1, default_value=1
-            )
-        )
+        # config_space.add_hyperparameter(
+        #     CS.UniformIntegerHyperparameter(
+        #         "predict_pairs", lower=0, upper=1, default_value=1
+        #     )
+        # )
 
         return config_space
 
@@ -380,6 +380,8 @@ class MetaLearnaWorker(Worker):
         # config["desired_gc"] = np.random.choice([.1, .2, .3, .4, .5, .6, .7, .8, .9])
         config["restart_timeout"] = None
         config["local_design"] = True
+        config["reward_function"] = 'structure_only'
+        config["predict_pairs"] = 1
 
         return config
 
