@@ -1,0 +1,19 @@
+#! /bin/bash
+
+#MSUB -E
+#MSUB -e logs/${MOAB_JOBID}.e
+#MSUB -o logs/${MOAB_JOBID}.o
+#MSUB -l nodes=1:ppn=1,walltime=4:00:00:00
+
+ANAPATH=/work/ws/nemo/fr_ds371-learna-0/analysis/bohb
+WSPATH=/work/ws/nemo/fr_ds371-learna-0/results/bohb
+
+cd learna_ba
+
+source thirdparty/miniconda/miniconda/bin/activate learna
+
+mkdir -p analysis/bohb
+
+python -m src.analyse.analyse_bohb_results --path ${WSPATH} --run 6538964 --out_dir ${ANAPATH} --mode 4 --n 5
+
+cp -r /work/ws/nemo/fr_ds371-learna-0/analysis/bohb/* analysis/bohb

@@ -123,7 +123,7 @@ def generate_local_motif_based(df):
     df['local_motif'] = motif_based_local_structures
     return df
 
-def datasets_to_tsv(datasets, out_dir, name):
+def datasets_to_tsv(datasets, out_dir, name, args):
     test_path = Path(out_dir, f"{name}_test")
     train_path = Path(out_dir, f"{name}_train")
     validation_path = Path(out_dir, f"{name}_validation")
@@ -135,32 +135,39 @@ def datasets_to_tsv(datasets, out_dir, name):
     print('Write test set data')
     datasets[0].to_csv(path_or_buf=Path(out_dir, f"{name}_test", "test.interim"), sep='\t', index=False)
     datasets[0]['structure'].to_csv(Path(out_dir, f"{name}_test", "test.rna"), sep='\t', index=False)
-    datasets[0]['local_random'].to_csv(Path(out_dir, f"{name}_test", "test.local"), sep='\t', index=False)
-    datasets[0]['local_motif'].to_csv(Path(out_dir, f"{name}_test", "test.motif"), sep='\t', index=False)
     datasets[0]['gc_content'].to_csv(Path(out_dir, f"{name}_test", "test.gc"), sep='\t', index=False)
     datasets[0]['mfe'].to_csv(Path(out_dir, f"{name}_test", "test.mfe"), sep='\t', index=False)
     datasets[0]['sequence'].to_csv(Path(out_dir, f"{name}_test", "test.seq"), sep='\t', index=False)
-    datasets[0]['motifs'].to_csv(Path(out_dir, f"{name}_test", "test.motifs"), sep='\t', index=False)
+
+    if args.local_random:
+        datasets[0]['local_random'].to_csv(Path(out_dir, f"{name}_test", "test.local"), sep='\t', index=False)
+        datasets[0]['local_motif'].to_csv(Path(out_dir, f"{name}_test", "test.motif"), sep='\t', index=False)
+    if args.motifs:
+        datasets[0]['motifs'].to_csv(Path(out_dir, f"{name}_test", "test.motifs"), sep='\t', index=False)
 
     print('Write training set data')
     datasets[1].to_csv(path_or_buf=Path(out_dir, f"{name}_train", "train.interim"), sep='\t', index=False)
     datasets[1]['structure'].to_csv(Path(out_dir, f"{name}_train", "train.rna"), sep='\t', index=False)
-    datasets[1]['local_random'].to_csv(Path(out_dir, f"{name}_train", "train.local"), sep='\t', index=False)
-    datasets[1]['local_motif'].to_csv(Path(out_dir, f"{name}_train", "train.motif"), sep='\t', index=False)
-    datasets[1]['gc_content'].to_csv(Path(out_dir, f"{name}_train", "train.gc"), sep='\t', index=False)
     datasets[1]['mfe'].to_csv(Path(out_dir, f"{name}_train", "train.mfe"), sep='\t', index=False)
     datasets[1]['sequence'].to_csv(Path(out_dir, f"{name}_train", "train.seq"), sep='\t', index=False)
-    datasets[1]['motifs'].to_csv(Path(out_dir, f"{name}_train", "train.motifs"), sep='\t', index=False)
+    datasets[1]['gc_content'].to_csv(Path(out_dir, f"{name}_train", "train.gc"), sep='\t', index=False)
+    if args.local_random:
+        datasets[1]['local_random'].to_csv(Path(out_dir, f"{name}_train", "train.local"), sep='\t', index=False)
+        datasets[1]['local_motif'].to_csv(Path(out_dir, f"{name}_train", "train.motif"), sep='\t', index=False)
+    if args.motifs:
+        datasets[1]['motifs'].to_csv(Path(out_dir, f"{name}_train", "train.motifs"), sep='\t', index=False)
 
     print('Write validation set data')
     datasets[2].to_csv(path_or_buf=Path(out_dir, f"{name}_validation", "validation.interim"), sep='\t', index=False)
     datasets[2]['structure'].to_csv(Path(out_dir, f"{name}_validation", "validation.rna"), sep='\t', index=False)
-    datasets[2]['local_random'].to_csv(Path(out_dir, f"{name}_validation", "validation.local"), sep='\t', index=False)
-    datasets[2]['local_motif'].to_csv(Path(out_dir, f"{name}_validation", "validation.motif"), sep='\t', index=False)
-    datasets[2]['gc_content'].to_csv(Path(out_dir, f"{name}_validation", "validation.gc"), sep='\t', index=False)
     datasets[2]['mfe'].to_csv(Path(out_dir, f"{name}_validation", "validation.mfe"), sep='\t', index=False)
     datasets[2]['sequence'].to_csv(Path(out_dir, f"{name}_validation", "validation.seq"), sep='\t', index=False)
-    datasets[2]['motifs'].to_csv(Path(out_dir, f"{name}_validation", "validation.motifs"), sep='\t', index=False)
+    datasets[2]['gc_content'].to_csv(Path(out_dir, f"{name}_validation", "validation.gc"), sep='\t', index=False)
+    if args.local_random:
+        datasets[2]['local_random'].to_csv(Path(out_dir, f"{name}_validation", "validation.local"), sep='\t', index=False)
+        datasets[2]['local_motif'].to_csv(Path(out_dir, f"{name}_validation", "validation.motif"), sep='\t', index=False)
+    if args.motifs:
+        datasets[2]['motifs'].to_csv(Path(out_dir, f"{name}_validation", "validation.motifs"), sep='\t', index=False)
 
 
 if __name__ == '__main__':
@@ -234,6 +241,13 @@ if __name__ == '__main__':
         action="store_true",
         help="Create dataset for local RNA Design",
     )
+
+    parser.add_argument(
+        "--motifs",
+        action="store_true",
+        help="Create motif based sequence-structure targets",
+    )
+
 
     parser.add_argument(
         "--maximum_replacements",
@@ -314,10 +328,11 @@ if __name__ == '__main__':
         print("Generate random structures for local design")
         datasets = [generate_local_random(dataset, args.maximum_replacements, args.replace_quantile, args.suffix_size) for dataset in datasets]
 
-    # extract motifs from structures and generate local data by inserting structural motifs into sequence
-    print('Generate motif based structures for local design ')
-    datasets = [generate_local_motif_based(extract_motifs(dataset)) for dataset in datasets]
+    if args.motifs:
+        # extract motifs from structures and generate local data by inserting structural motifs into sequence
+        print('Generate motif based structures for local design ')
+        datasets = [generate_local_motif_based(extract_motifs(dataset)) for dataset in datasets]
 
     print(f"Write data to {args.out_dir}")
     name = args.name if args.name else 'rfam_learn_local'
-    datasets_to_tsv(datasets, args.out_dir, name=name)
+    datasets_to_tsv(datasets, args.out_dir, name=name, args=args)

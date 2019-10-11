@@ -66,7 +66,7 @@ rfam-interim:
 
 rfam-local-dataset:
 	@source activate learna && \
-	python -m src.data.generate_rfam_dataset --unique --local_random --name rfam_learn_local_min_10 --minimum_length 10
+	python -m src.data.generate_rfam_dataset --unique --name rfam_learn_jörg --minimum_length 10 --size 80000 --train_multiplier 10
 
 split-local-data:
 	@source activate learna && \
@@ -287,6 +287,12 @@ bohb-example:
 # Analysis and Visualization
 ################################################################################
 
+analyse-datasets:
+	@source activate learna && \
+	python -m src.analyse.analyse_datasets
+
+
+
 ## Analyse experiment group %
 analyse-performance-%:
 	@source activate learna && \
@@ -314,7 +320,7 @@ analyse-output-test:
 ## Analyse Bohb runs
 analyse-bohb-%:
 	@source activate learna && \
-	python -m src.analyse.analyse_bohb_results --run $*
+	python -m src.analyse.analyse_bohb_results --run $* --out_dir results/fanova_test --mode 4 --n 5
 
 
 ## Plot reproduced results using pgfplots
