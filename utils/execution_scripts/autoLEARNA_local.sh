@@ -19,4 +19,5 @@ source thirdparty/miniconda/miniconda/bin/activate learna
   --state_radius 22 \
   --reward_function "structure_only" \
   --target_structure_path $TARGET_STRUCTURE_PATH \
+  --local_design \
   --restart_timeout 1800

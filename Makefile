@@ -224,7 +224,7 @@ test-timed-execution-%:
 		--data_dir data/ \
 		--results_dir results/ \
 		--experiment_group test_anta_local \
-		--method antarna_local \
+		--method autoLEARNA_local \
 		--dataset rfam_local_test \
 		--task_id $*
 

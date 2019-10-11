@@ -11,6 +11,12 @@ OPTIMIZATION:
 6663702  -> Learna optimization 2 days reward=structure only, predict pairs = True, sum of min distances
 6663703  -> Meta-learna optimization 2 days; reward = structure_only; predict_pairs=True, sum of min distances
 
+
 EVALUATION:
 6576547 --> antarna_local on rfam_local_test: 3600 timeout, 5 attempts,
 6576548 --> autoLEARNA_local best config from 4 day learna autoRL run on rfam_local_test: 3600 timeout, 5 attempts
+
+
+
+FANOVA:
+6700046  -> 6538964 fANOVA 5 most important pairwise marginal plot generation on nemo
