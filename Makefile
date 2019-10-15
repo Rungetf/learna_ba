@@ -51,6 +51,13 @@ clean-thirdparty:
 	cd thirdparty/antarna && make clean
 	cd thirdparty/eastman && make clean
 
+## Clean folder structure for rebuild
+clean-analysis-env:
+	if [ -d "$(PWD)/miniconda/miniconda/envs/analysis" ]; then \
+	conda env remove -n analysis -y; \
+	fi
+
+
 ################################################################################
 # Setup General
 ################################################################################
@@ -66,7 +73,7 @@ rfam-interim:
 
 rfam-local-dataset:
 	@source activate learna && \
-	python -m src.data.generate_rfam_dataset --unique --name rfam_learn_jörg --minimum_length 10 --size 80000 --train_multiplier 10
+	python -m src.data.generate_rfam_dataset --unique --name rfam_local_min_1000 --minimum_length 1000 --size 100 --train_multiplier 1 --validation_multiplier 1 --local_random --motifs
 
 split-local-data:
 	@source activate learna && \
@@ -108,6 +115,11 @@ antarna-data:
 requirements:
 	./thirdparty/miniconda/make_miniconda.sh
 	conda env create -f environment.yml
+
+## Install all dependencies for analysis
+analysis-env:
+	conda env create -f analysis.yml
+
 
 ## Install all thirdparty requirements
 thirdparty-requirements:
@@ -224,7 +236,7 @@ test-timed-execution-%:
 		--data_dir data/ \
 		--results_dir results/ \
 		--experiment_group test_anta_local \
-		--method autoLEARNA_local \
+		--method 6703894_507_0_6 \
 		--dataset rfam_local_test \
 		--task_id $*
 
@@ -286,6 +298,13 @@ bohb-example:
 ################################################################################
 # Analysis and Visualization
 ################################################################################
+validate-datasets:
+	@source activate learna && \
+	python -m src.data.validate_datasets --data_dir data --datasets rfam_local_test rfam_local_validation rfam_local_train rfam_local_min_400_max_1000_test rfam_local_min_1000_test
+
+get-state-radius:
+	@source activate learna && \
+	python utils/get_state_radius.py --conv1 0 --conv2 3 --state_rel 0.3433192641967252
 
 analyse-datasets:
 	@source activate learna && \
@@ -296,7 +315,7 @@ analyse-datasets:
 ## Analyse experiment group %
 analyse-performance-%:
 	@source activate learna && \
-	python -m src.analyse.analyse_experiment_group --experiment_group ../../results_raw/$* --analysis_dir analysis/$* --root_sequences_dir data --ci_alpha 0.05
+	python -m src.analyse.analyse_experiment_group --experiment_group results/$* --analysis_dir analysis/$* --root_sequences_dir data --ci_alpha 0.05
 
 ## Analyse experiment group %
 analyse-performance-nemo-%:
@@ -320,7 +339,13 @@ analyse-output-test:
 ## Analyse Bohb runs
 analyse-bohb-%:
 	@source activate learna && \
-	python -m src.analyse.analyse_bohb_results --run $* --out_dir results/fanova_test --mode 4 --n 5
+	python -m src.analyse.analyse_bohb_results --run $* --out_dir results/fanova_test --mode 2 --n 5
+
+
+generate-bohb-plotting-data-%:
+	@source activate learna && \
+	python -m src.analyse.generate_bohb_pgfplot_data --path results/bohb --run $* --out_dir analysis/bohb
+
 
 
 ## Plot reproduced results using pgfplots

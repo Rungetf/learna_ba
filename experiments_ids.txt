@@ -1,20 +1,85 @@
 OPTIMIZATION:
+=============
 
 6493747  -> learna first bohb run 30 min max budget on rfam-local-validation  -> failed after 24h to sample new configs, wrong parameter (float) for sequence reward
 6493755  -> meta learna first bohb run max 1h budget 1 min validation
 
 6511133  -> restart learna 2 day optimization for sequence reward decision, changed logging to warning, changed float parameter for sequence_reward to integer between 0, 1. should work now
 
+AUTO RL:
+========
+
+4 days:
+
 6538964  -> First autoRL bohb-run for LEARNA with num_unsolved objective; 4 days 1000 cores; no sequence output; searches over action-semantics, 3 reward functions, state space (also via reward functions)
 6576532  -> AutoRL bohb run meta-LEARNA with num unsolved; 4 days 1000 cores; no sequence output; searches over action-semantics, 3 reward functions, state space (also via reward functions)
+
+
+PEAK PERFORMANCE VIA JOINT OPTIMIZATION:
+========================================
+
+2 days:
 
 6663702  -> Learna optimization 2 days reward=structure only, predict pairs = True, sum of min distances
 6663703  -> Meta-learna optimization 2 days; reward = structure_only; predict_pairs=True, sum of min distances
 
+4 days:
+
+6703893  -> LEARNA optimization 4 days reward=structure_only, predict_pairs=1, sum of min distances
+6703894  -> Meta-LEARNA optimization 4 days: reward=structure_only, predict_pairs=True, sum of min distances
 
 EVALUATION:
+===========
+
+rfam_local_test:
+----------------
+
 6576547 --> antarna_local on rfam_local_test: 3600 timeout, 5 attempts,
-6576548 --> autoLEARNA_local best config from 4 day learna autoRL run on rfam_local_test: 3600 timeout, 5 attempts
+
+all errored or wrong config!!!!!! --> 6705149 --> autoLEARNA_local best config from 4 day learna autoRL run on rfam_local_test: 3600 timeout, 5 attempts; config: (6538964, (244, 0, 13) = Incumbent)
+all errored or wrong config!!!!!! --> 6709955 --> Meta-LEARNA 4 day auto rl run 6576532_482_0_0 incumbent --> errored
+all errored or wrong config!!!!!! --> 6710060 --> Meta-LEARNA rerun 4 day autoRL run 6576532_482_0_0 incumbent, now loading model from models/ instead of /work/ws/nemo/fr_ds.../results/bohb/6576532/482_0_0
+all errored or wrong config!!!!!! -->
+all errored or wrong config!!!!!! --> 6709956 --> learna-peak 2 day 6663702_172_0_13 incumbent
+all errored or wrong config!!!!!! --> 6709957 --> Meta-learna_peak 2 days 6663703_156_0_7 incumbent
+
+6710368  -> LEARNA 4 day autoRL bohb run config 6538964_244_0_13 = Incumbent
+6710369  -> 4 day Meta-LEARNA autoRL run config 6576532_482_0_0 = Incumbent
+
+6710370  -> LEARNA 2 day peak performance bohb run config 6663702_172_0_13 = Incumbent
+6710371  -> Meta-LEARNA 2 day peak performance bohb run config 6663703_156_0_7 = Incumbent
+
+6712767  -> Meta-LEARNA peak 4 days incumbent config: 6703894_507_0_6
+
+
+6712851  -> 6576532_482_0_0_adapt
+6712852  -> 6663703_156_0_7_adapt
+6712853  -> 6703894_507_0_6_adapt
+rfam_local_min_400_masx_1000_test:
+----------------------------------
+
+6710735  -> antarna_local 3600; 5 attempts
+
+6710730  -> LEARNA 4 day autoRL bohb run config 6538964_244_0_13 = Incumbent
+6710738  -> 4 day Meta-LEARNA autoRL run config 6576532_482_0_0 = Incumbent
+
+6710741  -> LEARNA 2 day peak performance bohb run config 6663702_172_0_13 = Incumbent
+6710742  -> Meta-LEARNA 2 day peak performance bohb run config 6663703_156_0_7 = Incumbent
+
+rfam_local_min_1000_test:
+-------------------------
+
+6710744  -> antarna_local 3600; 5 attempts
+
+6710745  -> LEARNA 4 day autoRL bohb run config 6538964_244_0_13 = Incumbent
+6710748  -> 4 day Meta-LEARNA autoRL run config 6576532_482_0_0 = Incumbent
+
+6710749  -> LEARNA 2 day peak performance bohb run config 6663702_172_0_13 = Incumbent
+6710752  -> Meta-LEARNA 2 day peak performance bohb run config 6663703_156_0_7 = Incumbent
+
+
+
+
 
 
 
