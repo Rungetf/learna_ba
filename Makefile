@@ -153,10 +153,10 @@ experiment-test:
 	--num_lstm_layers 0 \
 	--reward_exponent 7.077835098205039 \
 	--state_radius 23 \
-	--reward_function "structure_only" \
+	--reward_function "sequence_and_structure" \
 	--local_design \
 	--state_representation "sequence_progress" \
-	--data_type "motif"
+	--data_type "motif-sort"
 	--restart_timeout 1800 \
 	--predict_pairs
 

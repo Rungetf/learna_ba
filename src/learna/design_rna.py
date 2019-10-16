@@ -183,6 +183,8 @@ if __name__ == "__main__":
 
 
     args = parser.parse_args()
+    if args.dataset.stem[-5:] != 'train':
+        args.data_type = "random"
 
     print(f"args: \n {args}")
 

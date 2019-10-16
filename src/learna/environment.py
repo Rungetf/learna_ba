@@ -526,9 +526,6 @@ gc control
             The first state.
         """
         self.target = next(self._target_gen)
-        counter = 0
-        if counter == 0:
-            print(self.target.local_target)
         self.target.reset()
         if self._env_config.reward_function == 'structure_only':
             self.target.reset_counter()
@@ -565,6 +562,68 @@ gc control
             start : start + 2 * self._env_config.state_radius + 1
         ]
 
+
+    def _local_improvement(self, folded_design):
+        """
+        Compute Hamming distance of locally improved candidate solutions.
+        Returns:
+            The minimum Hamming distance of all imporved candidate solutions.
+        """
+        differing_sites = _string_difference_indices(
+            self.target.dot_bracket, folded_design
+        )
+        if self._env_config.local_design:
+            sequence_parts, _ = self.target.partition
+            sequence_ranges = [range(start, end) for start, end in sequence_parts]
+            differing_sites = [site for site in differing_sites if all([site not in range for range in sequence_ranges])]
+
+        hamming_distances = []
+        for mutation in product("AGCU", repeat=len(differing_sites)):
+            mutated = self.design.get_mutated(mutation, differing_sites)
+            folded_mutated, _ = fold(mutated.primary)
+            hamming_distance = hamming(folded_mutated, self.target.dot_bracket)
+            hamming_distances.append(hamming_distance)
+            if hamming_distance == 0:  # For better timing results
+                return 0
+        return min(hamming_distances)
+
+    def reward_local_design(self):
+        distance = 0
+        folding = fold(self.design.primary)[0] if not self._env_config.reward_function == 'structure_only' else None
+        sequence_parts, folding_parts = self.target.partition  # get_sequence_parts()  # return tuple of <sequence start, sequence end>
+
+        if self._env_config.reward_function == 'sequence_and_structure':
+            for start, end in sequence_parts:
+                distance += hamming(self.design.primary[start:end], self.target.local_target[start:end])
+        else:
+            design = [c for c in self.design._primary_list]
+            for start, end in sequence_parts:
+                design[start:end] = self.target.local_target[start:end]
+            # print(design)
+            self.design = _Design(primary=[c for c in ''.join(design).rstrip()])
+            folding = fold(self.design.primary)[0]
+
+        for start, end in folding_parts:
+            distance +=  hamming(folding[start:end], self.target.local_target[start:end])
+        if distance == 0:
+            return 1.0
+        if 0 < distance < self._env_config.mutation_threshold:
+            distance = self._local_improvement(folding)
+
+        normalized_distance = (distance / len(self.target))
+
+        episode_info = EpisodeInfo(
+        target_id=self.target.id,
+        time=time.time(),
+        normalized_hamming_distance=normalized_distance,
+        )
+        self.episodes_info.append(episode_info)
+
+
+
+        return (1 - normalized_distance) ** self._env_config.reward_exponent
+
+
     def _get_reward(self, terminal):
         """
         Compute the reward after assignment of all nucleotides.
@@ -578,42 +637,29 @@ gc control
         if not terminal:
             return 0
 
-        print(f"Design @ reward: \n {self.design._primary_list}")
 
         # reward formulation for RNA local Design, excluding local improvement steps and gc content!!!!
         if self._env_config.local_design:
-            distance = 0
-            folding = fold(self.design.primary)[0] if not self._env_config.reward_function == 'structure_only' else None
-            print(f"Folding for sequence stuff:\n {folding}")
-            sequence_parts, folding_parts = self.target.partition  # get_sequence_parts()  # return tuple of <sequence start, sequence end>
+            return self.reward_local_design()
+        else:
+            folded_design, _ = fold(self.design.primary)
+            hamming_distance = hamming(folded_design, self.target.dot_bracket)
+            if 0 < hamming_distance < self._env_config.mutation_threshold:
+                hamming_distance = self._local_improvement(folded_design)
 
-            if self._env_config.reward_function == 'sequence_and_structure':
-                for start, end in sequence_parts:
-                    distance += hamming(self.design.primary[start:end], self.target.local_target[start:end])
-            else:
-                design = [c for c in self.design._primary_list]
-                for start, end in sequence_parts:
-                    design[start:end] = self.target.local_target[start:end]
-                    print(f"design inner loop: \n {design}")
-                # print(design)
-                self.design = _Design(primary=''.join(design))
-                folding = fold(self.design.primary)[0]
+            normalized_hamming_distance = hamming_distance / len(self.target)
 
-            for start, end in folding_parts:
-                distance +=  hamming(folding[start:end], self.target.local_target[start:end])
-            normalized_distance = (distance / len(self.target))
-
+            # For hparam optimization
             episode_info = EpisodeInfo(
-            target_id=self.target.id,
-            time=time.time(),
-            normalized_hamming_distance=normalized_distance,
+                target_id=self.target.id,
+                time=time.time(),
+                normalized_hamming_distance=normalized_hamming_distance,
             )
             self.episodes_info.append(episode_info)
 
-            if distance == 0:
-                return 1.0
+            return (1 - normalized_hamming_distance) ** self._env_config.reward_exponent
 
-            return (1 - normalized_distance) ** self._env_config.reward_exponent
+
 
 
     def execute(self, actions):
@@ -633,8 +679,6 @@ gc control
         terminal = self.design.first_unassigned_site is None if not self._env_config.reward_function == 'structure_only' else all([x is None for x in self.target.structure_parts_encoding])
         state = None if terminal else self._get_state()
         reward = self._get_reward(terminal)
-        print(f"Current state: \n {state}")
-        print(f"Current design: \n {self.design._primary_list}")
 
         return state, terminal, reward
 
