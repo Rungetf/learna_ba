@@ -10,6 +10,8 @@
 
 mkdir $TMPDIR/${MOAB_JOBID}
 tar -xzf /work/ws/nemo/fr_ds371-learna-0/data/rfam_local_test.tar.gz -C $TMPDIR/${MOAB_JOBID} >/dev/null 2>&1
+tar -xzf /work/ws/nemo/fr_ds371-learna-0/data/rfam_local_min_400_max_1000_test.tar.gz -C $TMPDIR/${MOAB_JOBID} >/dev/null 2>&1
+tar -xzf /work/ws/nemo/fr_ds371-learna-0/data/rfam_local_min_1000_test.tar.gz -C $TMPDIR/${MOAB_JOBID} >/dev/null 2>&1
 
 cd learna_ba
 

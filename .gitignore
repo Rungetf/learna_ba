@@ -10,6 +10,9 @@ data/test/
 data/rfam_raw/
 data/rfam_local_*.tar.gz
 data/test_local_train/
+data/rfam_learn_local_min_100_max_500_test/
+data/rfam_learn_local_min_500_test/
+
 
 # thirdparty
 thirdparty/antarna/src/
