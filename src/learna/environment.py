@@ -48,6 +48,8 @@ class RnaDesignEnvironmentConfig:
     # sequence_reward: bool = False
     predict_pairs: bool = False
     reward_function: str = 'structure'
+    state_representation: str = 'sequence-progress'
+    data_type: str = 'random'
     # training_data: str = 'random'
 
 
@@ -287,11 +289,15 @@ class _Target(object):
         self.sequence = dot_bracket[2] if env_config.local_design and len(dot_bracket) >= 7 else None
         self.local_target = dot_bracket[3] if env_config.local_design and len(dot_bracket) >= 7 else None
         self.local_motif = dot_bracket[4] if env_config.local_design and len(dot_bracket) >= 7 else None
+        if env_config.data_type == 'motif' or env_config.data_type == 'motif-sort':
+            self.local_target = self.local_motif
         self.gc = dot_bracket[5] if env_config.local_design and len(dot_bracket) >= 7 else None
         self.mfe = dot_bracket[6] if env_config.local_design and len(dot_bracket) >= 7 else None
         self._pairing_encoding = _encode_pairing(self.dot_bracket) if not env_config.local_design else _encode_pairing(self.local_target)
         self.padded_encoding = _encode_dot_bracket(self.dot_bracket, env_config) if not env_config.local_design else _encode_dot_bracket(self.local_target, env_config)
         self._current_site = 0
+        self._partition = self.get_sequence_parts()
+        self._sequence_progress = self.local_target if self._env_config.local_design else self.dot_bracket
         if env_config.reward_function == 'structure_only':
             self.structure_parts_encoding = _encode_structure_parts(self.local_target)
 
@@ -322,9 +328,28 @@ class _Target(object):
         """
         return self._pairing_encoding[site]
 
+    def reset(self):
+        self.sequence_progress = self.local_target if self._env_config.local_design else self.dot_bracket
+        self.padded_encoding = _encode_dot_bracket(self.dot_bracket, self._env_config) if not self._env_config.local_design else _encode_dot_bracket(self.local_target, self._env_config)
+
+    def assign_sites(self, index, value, paired_site):
+        new_local_target = list(self.sequence_progress)
+        if paired_site:
+            new_local_target[index[0]] = value[0]
+            new_local_target[index[1]] = value[1]
+        else:
+            new_local_target[index] = value
+        self.sequence_progress = ''.join(new_local_target)
+        self.padded_encoding = _encode_dot_bracket(self.sequence_progress, self._env_config)
+
+
     def reset_counter(self):
         self._current_site = 0
         self.structure_parts_encoding = _encode_structure_parts(self.local_target)
+
+    @property
+    def partition(self):
+        return self._partition
 
     @property
     def next_structure_site(self):
@@ -365,6 +390,7 @@ class _Design(object):
             self._primary_list = [None] * length
         self._dot_bracket = None
         self._current_site = 0
+        self._last_assignment = None
 
     def get_mutated(self, mutations, sites):
         """
@@ -396,14 +422,20 @@ class _Design(object):
             base_current, base_paired = self.action_to_pair[action]
             self._primary_list[site] = base_current
             self._primary_list[paired_site] = base_paired
+            self._last_assignment = ((site, paired_site), (base_current, base_paired), True)
         else:
             self._primary_list[site] = self.action_to_base[action]
+            self._last_assignment = (site, self.action_to_base[action], False)
 
     def replace_subsequences(self, target, keep_sequence):
         if keep_sequence == 'fully':
             mutations_and_sites = [(mutation, site) for site, mutation in enumerate(target) if mutation not in ['.', '(', ')']]
         mutations_and_sites = [(target[site], site) for site, _ in enumerate(self.primary) if _ == '_']
         return design.get_mutated([x[0] for x in mutations_and_sites], [x[1] for x in mutations_and_sites])
+
+    @property
+    def last_assignment(self):
+        return self._last_assignment
 
     @property
     def first_unassigned_site(self):
@@ -430,6 +462,11 @@ def _random_epoch_gen(data):
         for i in np.random.permutation(len(data)):
             yield data[i]
 
+def _sorted_data_gen(data):
+    data = sorted(data, key=lambda x: len(x))
+    while True:
+        for target in data:
+            yield target
 
 @dataclass
 class EpisodeInfo:
@@ -465,12 +502,15 @@ gc control
 
         targets = [_Target(dot_bracket, self._env_config) for dot_bracket in dot_brackets]
         self._target_gen = _random_epoch_gen(targets)
+        if self._env_config.data_type == 'random-sort' or self._env_config.data_type == 'motif-sort':
+            self._target_gen = _sorted_data_gen(targets)
 
         self.target = None
         self.design = None
         # print(self._env_config.gc_tolerance, self._env_config.desired_gc)
         # self._constraint_controller = ConstraintControler(self._env_config.gc_tolerance, self._env_config.desired_gc)
         self.episodes_info = []
+        print(self._env_config)
 
     def __str__(self):
         return "RnaDesignEnvironment"
@@ -486,6 +526,10 @@ gc control
             The first state.
         """
         self.target = next(self._target_gen)
+        counter = 0
+        if counter == 0:
+            print(self.target.local_target)
+        self.target.reset()
         if self._env_config.reward_function == 'structure_only':
             self.target.reset_counter()
         self.design = _Design(len(self.target))
@@ -509,7 +553,14 @@ gc control
         Returns:
             The next state.
         """
+
         start = self.target.next_structure_site if self._env_config.reward_function == 'structure_only' else self.design.first_unassigned_site
+
+        if not self._env_config.state_representation == 'n-gram':
+            if self.design.last_assignment:
+                index, value, paired_site = self.design.last_assignment
+                self.target.assign_sites(index, value, paired_site)
+
         return self.target.padded_encoding[
             start : start + 2 * self._env_config.state_radius + 1
         ]
@@ -527,11 +578,14 @@ gc control
         if not terminal:
             return 0
 
+        print(f"Design @ reward: \n {self.design._primary_list}")
+
         # reward formulation for RNA local Design, excluding local improvement steps and gc content!!!!
         if self._env_config.local_design:
             distance = 0
             folding = fold(self.design.primary)[0] if not self._env_config.reward_function == 'structure_only' else None
-            sequence_parts, folding_parts = self.target.get_sequence_parts()  # return tuple of <sequence start, sequence end>
+            print(f"Folding for sequence stuff:\n {folding}")
+            sequence_parts, folding_parts = self.target.partition  # get_sequence_parts()  # return tuple of <sequence start, sequence end>
 
             if self._env_config.reward_function == 'sequence_and_structure':
                 for start, end in sequence_parts:
@@ -540,6 +594,8 @@ gc control
                 design = [c for c in self.design._primary_list]
                 for start, end in sequence_parts:
                     design[start:end] = self.target.local_target[start:end]
+                    print(f"design inner loop: \n {design}")
+                # print(design)
                 self.design = _Design(primary=''.join(design))
                 folding = fold(self.design.primary)[0]
 
@@ -577,6 +633,8 @@ gc control
         terminal = self.design.first_unassigned_site is None if not self._env_config.reward_function == 'structure_only' else all([x is None for x in self.target.structure_parts_encoding])
         state = None if terminal else self._get_state()
         reward = self._get_reward(terminal)
+        print(f"Current state: \n {state}")
+        print(f"Current design: \n {self.design._primary_list}")
 
         return state, terminal, reward
 

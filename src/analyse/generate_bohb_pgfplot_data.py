@@ -10,8 +10,10 @@ from pathlib import Path
 import ConfigSpace as CS
 import pandas as pd
 
+
 def read_data(path, run):
     return hpres.logged_results_to_HBS_result(Path(path, run))
+
 
 def reward_vs_loss(result, path, run, out_dir):
     data = result.get_pandas_dataframe()
@@ -66,11 +68,11 @@ def budgets_vs_loss(result, path, run, out_dir):
     path = Path(out_dir, run, 'budgets')
     path.mkdir(exist_ok=True, parents=True)
 
-
     for budget in budgets:
         budget_df = budgets_df.where(lambda x: x.budget == budget).dropna()
         budget_df['budget'] = budget_df.index
         budget_df.to_csv(path_or_buf=Path(path, f"{budget}.tsv"), sep='\t', index=False)
+
 
 def nas_vs_loss(result, path, run, out_dir):
     data = result.get_pandas_dataframe()
@@ -105,11 +107,6 @@ def nas_vs_loss(result, path, run, out_dir):
     lstm_and_fc_df.to_csv(path_or_buf=Path(path, 'lstm.tsv'), sep='\t', index=False)
     cnn_and_fc_df.to_csv(path_or_buf=Path(path, 'cnn.tsv'), sep='\t', index=False)
     lstm_cnn_fc_df.to_csv(path_or_buf=Path(path, 'lstm_cnn_fc.tsv'), sep='\t', index=False)
-
-
-
-
-
 
 if __name__ == '__main__':
     import argparse

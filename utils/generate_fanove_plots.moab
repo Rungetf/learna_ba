@@ -10,7 +10,7 @@ WSPATH=/work/ws/nemo/fr_ds371-learna-0/results/bohb
 
 cd learna_ba
 
-source thirdparty/miniconda/miniconda/bin/activate learna
+source thirdparty/miniconda/miniconda/bin/activate analysis
 
 mkdir -p analysis/bohb
 

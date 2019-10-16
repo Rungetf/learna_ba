@@ -15,6 +15,8 @@ dependencies:
   - configspace
   - scipy
   - matplotlib
+  - gcc_linux-64
+  - libgcc-ng
   - pip:
     - appdirs==1.4.3
     - asn1crypto==0.24.0
@@ -35,7 +37,7 @@ dependencies:
     - Distance==0.1.3
     - docutils==0.14
     - enum34==1.1.6
-    - fanova==2.0.14
+    - fanova
     - hpbandster==0.7.4
     - html5lib==0.9999999
     - idna==2.8

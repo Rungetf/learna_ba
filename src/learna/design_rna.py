@@ -31,7 +31,7 @@ def _get_episode_finished(timeout, stop_once_solved):
         # gc_satisfied = env.episodes_info[-1].gc_satisfied
         elapsed_time = time.time() - start_time
         # print(elapsed_time, last_reward, last_fractional_hamming, gc_satisfied, last_gc_content, agent_gc, candidate_solution)
-        # print(elapsed_time, last_reward, candidate_solution)
+        print(elapsed_time, last_reward, candidate_solution)
 
         no_timeout = not timeout or elapsed_time < timeout
         stop_since_solved = stop_once_solved and last_reward == 1.0
@@ -109,7 +109,7 @@ if __name__ == "__main__":
 
     # Data
     parser.add_argument(
-        "--target_structure_path", type=Path, help="Path to sequence to run on"
+        "--target_structure_path", default=None, type=Path, help="Path to sequence to run on"
     )
     parser.add_argument("--data_dir", default="data", help="Data directory")
     parser.add_argument("--dataset", type=Path, help="Available: eterna, rfam_taneda")
@@ -176,10 +176,15 @@ if __name__ == "__main__":
     # parser.add_argument("--training_data", default="random", type=str, help="Choose the training data for local design: random sequences, motif based sequences")
     parser.add_argument("--local_design", action="store_true", help="Choose if agent should do RNA local Design")
     parser.add_argument("--predict_pairs", action="store_true", help="Choose if Actions are used to directly predict watson-crick base pairs")
+    parser.add_argument("--state_representation", type=str, default='n-gram', help="Choose between n-gram and sequence_progress to show the nucleotides already placed in the state")
+    parser.add_argument("--data_type", type=str, default='random', help="Choose type of training data, random motifs or motifs with balanced brackets")
+
     # parser.add_argument("--structure_only", action="store_true", help="Choose if state only considers structure parts of the target")
 
 
     args = parser.parse_args()
+
+    print(f"args: \n {args}")
 
     network_config = NetworkConfig(
         conv_sizes=args.conv_sizes,  # radius * 2 + 1
@@ -211,6 +216,8 @@ if __name__ == "__main__":
         # sequence_reward=args.sequence_reward,
         reward_function=args.reward_function,
         predict_pairs=args.predict_pairs,
+        state_representation=args.state_representation,
+        data_type=args.data_type,
         # structure_only=args.structure_only,
         # training_data=args.training_data,
     )
@@ -227,6 +234,7 @@ if __name__ == "__main__":
             target_structure_ids=args.target_structure_ids,
             target_structure_path=args.target_structure_path,
         )
+    print(dot_brackets)
 
     design_rna(
         dot_brackets,

@@ -16,6 +16,7 @@ import hpbandster.core.result as hpres
 from hpbandster.optimizers import BOHB as BOHB
 from src.optimization.learna_worker import LearnaWorker
 from src.optimization.meta_learna_worker import MetaLearnaWorker
+from src.optimization.meta_learna_adapt_worker import MetaLearnaAdaptWorker
 
 
 parser = argparse.ArgumentParser(
@@ -63,7 +64,7 @@ parser.add_argument(
     help="A directory that is accessible for all processes, e.g. a NFS share.",
 )
 
-parser.add_argument("--mode", choices=["learna", "meta_learna"], default="learna")
+parser.add_argument("--mode", choices=["learna", "meta_learna", "meta_learna_adapt"], default="learna")
 
 
 # args=parser.parse_args("--run_id test --nic_name lo --shared_directory /tmp --n_cores 4 --data_dir src/data --mode L2DesignRNA".split())
@@ -79,6 +80,15 @@ if args.mode == "learna":
 
 if args.mode == "meta_learna":
     worker_cls = MetaLearnaWorker
+    worker_args = dict(
+        data_dir=args.data_dir,
+        num_cores=args.n_cores,
+        train_sequences=range(1, 100000),
+        validation_timeout=60,
+    )
+
+if args.mode == "meta_learna_adapt":
+    worker_cls = MetaLearnaAdaptWorker
     worker_args = dict(
         data_dir=args.data_dir,
         num_cores=args.n_cores,

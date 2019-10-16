@@ -53,7 +53,8 @@ clean-thirdparty:
 
 ## Clean folder structure for rebuild
 clean-analysis-env:
-	if [ -d "$(PWD)/miniconda/miniconda/envs/analysis" ]; then \
+	@source activate learna && \
+	if [ -d "$(PWD)/thirdparty/miniconda/miniconda/envs/analysis" ]; then \
 	conda env remove -n analysis -y; \
 	fi
 
@@ -73,7 +74,7 @@ rfam-interim:
 
 rfam-local-dataset:
 	@source activate learna && \
-	python -m src.data.generate_rfam_dataset --unique --name rfam_local_min_1000 --minimum_length 1000 --size 100 --train_multiplier 1 --validation_multiplier 1 --local_random --motifs
+	python -m src.data.generate_rfam_dataset --unique --name rfam_local_long --minimum_length 200 --size 100 --train_multiplier 1000 --validation_multiplier 1 --local_random --motifs
 
 split-local-data:
 	@source activate learna && \
@@ -136,40 +137,28 @@ thirdparty-requirements:
 experiment-test:
 	@source activate learna && \
 	python -m src.learna.design_rna \
+	--dataset 'rfam_local_validation' \
+	--data_dir 'data' \
+	--target_structure_ids 1 2 3 4 5 6 7 8 9 \
 	--mutation_threshold 5 \
-	--batch_size 126 \
-	--conv_sizes 17 5 \
-	--conv_channels 7 18 \
-	--embedding_size 3 \
- 	--entropy_regularization 6.762991409135427e-05 \
-  --fc_units 57 \
-  --learning_rate 0.001 \
-  --lstm_units 28 \
-  --num_fc_layers 1 \
-  --num_lstm_layers 1 \
-  --reward_exponent 9.33503385734547 \
-  --state_radius 32 \
-  --restart_timeout 1800 \
-	--dataset rfam_local_test \
-	--data_dir data \
+	--batch_size 75 \
+	--conv_sizes 0 0 \
+	--conv_channels 8 23 \
+	--embedding_size 7 \
+	--entropy_regularization 0.0062538752481115885 \
+	--fc_units 47 \
+	--learning_rate 0.0007629922155340233 \
+	--lstm_units 10 \
+	--num_fc_layers 1 \
+	--num_lstm_layers 0 \
+	--reward_exponent 7.077835098205039 \
+	--state_radius 23 \
+	--reward_function "structure_only" \
 	--local_design \
-	--reward_function 'sequence_and_structure' \
-	--target_structure_ids 3 \
-	--timeout 1800
-	# --predict_pairs \
-	# --keep_sequence fully \
-	# --training_data random \
-	# --num_actions 4 \
-	# --sequence_reward \
-	# --learning_rate 0.0005991629320464973 \
-	# --target_structure_path data/rfam_local_test/1.rna \
-	# --gc_improvement_step \
-	# --gc_reward \
-	# --desired_gc 0.1 \
-	# --gc_weight 1 \
-	# --gc_tolerance 0.01 \
-	# > ../../test_results/eterna/LEARNA/run-plot/2_plot_run_gc_01.out
-	# --learning_rate 0.0005991629320464973 \
+	--state_representation "sequence_progress" \
+	--data_type "motif"
+	--restart_timeout 1800 \
+	--predict_pairs
 
 
 ## Local Meta-LEARNA experiment with GC-control
@@ -236,7 +225,7 @@ test-timed-execution-%:
 		--data_dir data/ \
 		--results_dir results/ \
 		--experiment_group test_anta_local \
-		--method 6703894_507_0_6 \
+		--method 6576532_482_0_0_frainet \
 		--dataset rfam_local_test \
 		--task_id $*
 
@@ -300,7 +289,7 @@ bohb-example:
 ################################################################################
 validate-datasets:
 	@source activate learna && \
-	python -m src.data.validate_datasets --data_dir data --datasets rfam_local_test rfam_local_validation rfam_local_train rfam_local_min_400_max_1000_test rfam_local_min_1000_test
+	python -m src.data.validate_datasets --data_dir data
 
 get-state-radius:
 	@source activate learna && \
@@ -338,8 +327,8 @@ analyse-output-test:
 
 ## Analyse Bohb runs
 analyse-bohb-%:
-	@source activate learna && \
-	python -m src.analyse.analyse_bohb_results --run $* --out_dir results/fanova_test --mode 2 --n 5
+	@source activate analysis && \
+	python -m src.analyse.analyse_bohb_results --run $* --out_dir results/fanova_test --mode 4 --n 5
 
 
 generate-bohb-plotting-data-%:

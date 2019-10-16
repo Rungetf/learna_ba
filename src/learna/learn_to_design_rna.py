@@ -160,6 +160,8 @@ if __name__ == "__main__":
     # parser.add_argument("--training_data", default="random", type=str, help="Choose the training data for local design: random sequences, motif based sequences")
     parser.add_argument("--local_design", action="store_true", help="Choose if agent should do RNA local Design")
     parser.add_argument("--predict_pairs", action="store_true", help="Choose if Actions are used to directly predict watson-crick base pairs")
+    parser.add_argument("--state_representation", type=str, default='n-gram', help="Choose between n-gram and sequence_progress to show the nucleotides already placed in the state")
+    parser.add_argument("--data_type", type=str, default='random', help="Choose type of training data, random motifs or motifs with balanced brackets")
 
 
 
@@ -192,6 +194,8 @@ if __name__ == "__main__":
         # sequence_reward=args.sequence_reward,
         reward_function=args.reward_function,
         predict_pairs=args.predict_pairs,
+        state_representation=args.state_representation,
+        data_type=args.data_type,
         # structure_only=args.structure_only,
         # training_data=args.training_data,
     )
