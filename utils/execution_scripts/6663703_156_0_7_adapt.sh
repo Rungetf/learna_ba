@@ -20,5 +20,4 @@ source thirdparty/miniconda/miniconda/bin/activate learna
   --target_structure_path $TARGET_STRUCTURE_PATH \
   --local_design \
   --predict_pairs \
-  --restore_path /work/ws/nemo/fr_ds371-learna-0/results/bohb/6663703/156_0_7 \
-  --stop_learning
+  --restore_path /work/ws/nemo/fr_ds371-learna-0/results/bohb/6663703/156_0_7 
