@@ -278,7 +278,7 @@ class LearnaWorker(Worker):
 
         config_space.add_hyperparameter(
             CS.CategoricalHyperparameter(
-                "data_type", choices=['motif', 'motif-sort', 'random', 'random-sort']
+                "data_type", choices=['random', 'random-sort']
             )
         )
 

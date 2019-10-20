@@ -502,7 +502,7 @@ gc control
 
         targets = [_Target(dot_bracket, self._env_config) for dot_bracket in dot_brackets]
         self._target_gen = _random_epoch_gen(targets)
-        if self._env_config.data_type == 'random-sort' or self._env_config.data_type == 'motif-sort':
+        if self._env_config.data_type == 'random-sort':
             self._target_gen = _sorted_data_gen(targets)
 
         self.target = None

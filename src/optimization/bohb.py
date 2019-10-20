@@ -4,7 +4,7 @@ os.environ["OMP_NUM_THREADS"] = "1"
 
 import logging
 
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.DEBUG)
 
 import argparse
 import pickle

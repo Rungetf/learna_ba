@@ -15,6 +15,15 @@ AUTO RL:
 6576532  -> AutoRL bohb run meta-LEARNA with num unsolved; 4 days 1000 cores; no sequence output; searches over action-semantics, 3 reward functions, state space (also via reward functions)
 
 
+FREINET:
+========
+
+6717713  -> LEARNAfreinet 4 days optimization --> many workers died, restart!!! exclude motif schedule!!!
+6717714  -> Meta-LEARNAfreinet 4 days optimization  -> I'll keep this one running until I realize that something is wrong.
+6717715  -> Meta-LEARNA-Adaptfreinet 4 days optimization  -> something went wrong, I'll restart it...
+
+
+
 PEAK PERFORMANCE VIA JOINT OPTIMIZATION:
 ========================================
 
@@ -27,6 +36,8 @@ PEAK PERFORMANCE VIA JOINT OPTIMIZATION:
 
 6703893  -> LEARNA optimization 4 days reward=structure_only, predict_pairs=1, sum of min distances
 6703894  -> Meta-LEARNA optimization 4 days: reward=structure_only, predict_pairs=True, sum of min distances
+
+
 
 EVALUATION:
 ===========
@@ -81,7 +92,8 @@ rfam_local_min_1000_test:
 
 
 
-
-
 FANOVA:
+=======
+
+
 6700046  -> 6538964 fANOVA 5 most important pairwise marginal plot generation on nemo
