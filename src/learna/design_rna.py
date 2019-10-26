@@ -29,9 +29,9 @@ def _get_episode_finished(timeout, stop_once_solved):
         # last_gc_content = env.episodes_info[-1].gc_content
         # agent_gc = env.episodes_info[-1].agent_gc
         # gc_satisfied = env.episodes_info[-1].gc_satisfied
-        elapsed_time = time.time() - start_time
+        # elapsed_time = time.time() - start_time
         # print(elapsed_time, last_reward, last_fractional_hamming, gc_satisfied, last_gc_content, agent_gc, candidate_solution)
-        # print(elapsed_time, last_reward, candidate_solution)
+        print(elapsed_time, last_reward, candidate_solution)
 
         no_timeout = not timeout or elapsed_time < timeout
         stop_since_solved = stop_once_solved and last_reward == 1.0
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     # Model
     parser.add_argument("--restore_path", type=Path, help="From where to load model")
     parser.add_argument("--stop_learning", action="store_true", help="Stop learning")
-    parser.add_argument("--random_agent", action="store_true", help="Use random agent")
+    parser.add_argument("--agent", type=str, help="Select the agent, available choices:trpo, ppo, random")  # TRPO doesn't work, error in optimizers/solvers/conugate_gradient.py IndexedSlice does not have attribute get_shape
 
     # Timeout behaviour
     parser.add_argument("--timeout", default=None, type=int, help="Maximum time to run")
@@ -199,7 +199,7 @@ if __name__ == "__main__":
         learning_rate=args.learning_rate,
         batch_size=args.batch_size,
         entropy_regularization=args.entropy_regularization,
-        random_agent=args.random_agent,
+        agent=args.agent,
     )
     env_config = RnaDesignEnvironmentConfig(
         mutation_threshold=args.mutation_threshold,

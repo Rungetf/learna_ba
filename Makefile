@@ -139,7 +139,7 @@ experiment-test:
 	python -m src.learna.design_rna \
 	--dataset 'rfam_local_validation' \
 	--data_dir 'data' \
-	--target_structure_ids 1 2 3 4 5 6 7 8 9 \
+	--target_structure_ids 5 \
 	--mutation_threshold 5 \
 	--batch_size 75 \
 	--conv_sizes 0 0 \
@@ -153,11 +153,11 @@ experiment-test:
 	--num_lstm_layers 0 \
 	--reward_exponent 7.077835098205039 \
 	--state_radius 23 \
-	--reward_function "structure_replace_sequence" \
+	--reward_function "sequence_and_structure" \
 	--local_design \
 	--state_representation "n-gram" \
-	--data_type "motif"
-	--restart_timeout 1800
+	--data_type "random"
+	# --restart_timeout 1800
 	# --predict_pairs
 
 

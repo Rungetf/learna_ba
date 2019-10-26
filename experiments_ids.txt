@@ -22,6 +22,8 @@ FREINET:
 6717714  -> Meta-LEARNAfreinet 4 days optimization  -> I'll keep this one running until I realize that something is wrong.
 6717715  -> Meta-LEARNA-Adaptfreinet 4 days optimization  -> something went wrong, I'll restart it...
 
+6737349  -> rerun autoLEARNAfreinet 4 days optimization --> excluding motif based data
+6737353  -> rerun autoMeta-LEARNA-Adaptfreinet 4 days optimization --> excluding motif based data
 
 
 PEAK PERFORMANCE VIA JOINT OPTIMIZATION:

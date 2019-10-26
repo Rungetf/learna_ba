@@ -507,6 +507,7 @@ gc control
 
         self.target = None
         self.design = None
+        self._folding = None
         # print(self._env_config.gc_tolerance, self._env_config.desired_gc)
         # self._constraint_controller = ConstraintControler(self._env_config.gc_tolerance, self._env_config.desired_gc)
         self.episodes_info = []
@@ -562,41 +563,16 @@ gc control
             start : start + 2 * self._env_config.state_radius + 1
         ]
 
-
-    def _local_improvement(self, folded_design):
-        """
-        Compute Hamming distance of locally improved candidate solutions.
-        Returns:
-            The minimum Hamming distance of all imporved candidate solutions.
-        """
-        differing_sites = _string_difference_indices(
-            self.target.dot_bracket, folded_design
-        )
-        if self._env_config.local_design:
-            sequence_parts, _ = self.target.partition
-            sequence_ranges = [range(start, end) for start, end in sequence_parts]
-            differing_sites = [site for site in differing_sites if all([site not in range for range in sequence_ranges])]
-
-        hamming_distances = []
-        for mutation in product("AGCU", repeat=len(differing_sites)):
-            mutated = self.design.get_mutated(mutation, differing_sites)
-            folded_mutated, _ = fold(mutated.primary)
-            hamming_distance = hamming(folded_mutated, self.target.dot_bracket)
-            hamming_distances.append(hamming_distance)
-            if hamming_distance == 0:  # For better timing results
-                return 0
-        return min(hamming_distances)
-
-    def reward_local_design(self):
+    def _get_local_design_loss(self, design):
         distance = 0
-        folding = fold(self.design.primary)[0] if not self._env_config.reward_function == 'structure_only' else None
+        folding = fold(design.primary)[0] if self._env_config.reward_function == 'sequence_and_structure' else None
         sequence_parts, folding_parts = self.target.partition  # get_sequence_parts()  # return tuple of <sequence start, sequence end>
 
         if self._env_config.reward_function == 'sequence_and_structure':
             for start, end in sequence_parts:
-                distance += hamming(self.design.primary[start:end], self.target.local_target[start:end])
+                distance += hamming(design.primary[start:end], self.target.local_target[start:end])
         else:
-            design = [c for c in self.design._primary_list]
+            design = [c for c in design._primary_list]
             for start, end in sequence_parts:
                 design[start:end] = self.target.local_target[start:end]
             # print(design)
@@ -605,10 +581,67 @@ gc control
 
         for start, end in folding_parts:
             distance +=  hamming(folding[start:end], self.target.local_target[start:end])
+
+        return distance, folding
+
+
+    def _local_improvement(self, folded_design):
+        """
+        Compute Hamming distance of locally improved candidate solutions.
+        Returns:
+            The minimum Hamming distance of all imporved candidate solutions.
+        """
+        def flatten_list(list_):
+            return [item for sublist in list_ for item in sublist]
+
+
+        if self._env_config.local_design:
+            sequence_parts, structure_parts = self.target.partition
+            differing_sites_per_part = []
+
+            if self._env_config.reward_function == 'sequence_and_structure':
+                for start, end in sequence_parts:
+                    string_difference = _string_difference_indices(
+                        self.target.local_target[start:end], self.design.primary[start:end]
+                    )
+                    string_difference = [index + start for index in string_difference]
+                    differing_sites_per_part.append(string_difference)
+
+            for start, end in structure_parts:
+                string_difference = _string_difference_indices(
+                    self.target.local_target[start:end], self._folding[start:end]
+                )
+                string_difference = [index + start for index in string_difference]
+                differing_sites_per_part.append(string_difference)
+
+            differing_sites = flatten_list(differing_sites_per_part)
+        else:
+
+            differing_sites = _string_difference_indices(
+                self.target.dot_bracket, folded_design
+            )
+
+        hamming_distances = []
+        for mutation in product("AGCU", repeat=len(differing_sites)):
+            mutated = self.design.get_mutated(mutation, differing_sites)
+            folded_mutated, _ = fold(mutated.primary)
+
+            if self._env_config.local_design:
+                hamming_distance, _ = self._get_local_design_loss(mutated)
+            else:
+                hamming_distance = hamming(folded_mutated, self.target.dot_bracket)
+            hamming_distances.append(hamming_distance)
+            if hamming_distance == 0:  # For better timing results
+                return 0
+        return min(hamming_distances)
+
+    def reward_local_design(self):
+        distance, self._folding = self._get_local_design_loss(self.design)
+
         if distance == 0:
             return 1.0
         if 0 < distance < self._env_config.mutation_threshold:
-            distance = self._local_improvement(folding)
+            distance = self._local_improvement(self._folding)
 
         normalized_distance = (distance / len(self.target))
 
@@ -618,8 +651,6 @@ gc control
         normalized_hamming_distance=normalized_distance,
         )
         self.episodes_info.append(episode_info)
-
-
 
         return (1 - normalized_distance) ** self._env_config.reward_exponent
 

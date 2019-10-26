@@ -1,4 +1,4 @@
-from tensorforce.agents import PPOAgent, RandomAgent
+from tensorforce.agents import PPOAgent, RandomAgent, TRPOAgent
 from dataclasses import dataclass
 
 from functools import partial
@@ -107,7 +107,7 @@ class AgentConfig:
     batch_size: int = 5
     likelihood_ratio_clipping: float = 0.3
     entropy_regularization: float = 1.5e-3
-    random_agent: bool = False
+    agent: str = 'ppo'
 
 
 # This is needed / used because of the threaded runner interface of tensorforce, see
@@ -147,6 +147,45 @@ def ppo_agent_kwargs(agent_config, session_config):
         gae_lambda=None,
     )
 
+def trpo_agent_kwargs(agent_config, session_config):
+    """
+    Get keyword arguments for initializing a PPO agent.
+
+    Args:
+        agent_config: The configuration of the agent.
+        session_config: The session configuration.
+
+    Returns:
+        Dictionary of arguments for initialization of a TRPO agent.
+    """
+    # baseline_optimizer = dict(type="adam", learning_rate=agent_config.learning_rate)
+    return dict(
+        device=None,
+        session_config=None,
+        scope='trpo',
+        saver_spec=None,
+        summary_spec=None,
+        distributed_spec=None,
+        discount=0.99,
+        variable_noise=None,
+        states_preprocessing_spec=None,
+        explorations_spec=None,
+        reward_preprocessing_spec=None,
+        distributions_spec=None,
+        entropy_regularization=None,
+        baseline_mode=None,
+        baseline=None,
+        baseline_optimizer=None,
+        gae_lambda=None,
+        batched_observe=1000,
+        batch_size=1000,
+        keep_last_timestep=True,
+        likelihood_ratio_clipping=None,
+        learning_rate=1e-3,
+        cg_max_iterations=20,
+        cg_damping=1e-3,
+        cg_unroll_loop=False
+        )
 
 # This is needed / used because of the threaded runner interface of tensorforce, see
 # learn_to_design_rna.py.
@@ -188,19 +227,26 @@ def get_agent(environment, network, agent_config, session_config, restore_path):
     Returns:
        An agent.
     """
-    if agent_config.random_agent:
+    if agent_config.agent == 'random':
         return RandomAgent(
             environment.states,
             environment.actions,
             **random_agent_kwargs(agent_config, session_config)
         )
-
-    agent = PPOAgent(
-        environment.states,
-        environment.actions,
-        network,
-        **ppo_agent_kwargs(agent_config, session_config)
-    )
+    elif agent_config.agent == 'trpo':
+        agent = TRPOAgent(
+            environment.states,
+            environment.actions,
+            network,
+            **trpo_agent_kwargs(agent_config, session_config)
+        )
+    else:
+        agent = PPOAgent(
+            environment.states,
+            environment.actions,
+            network,
+            **ppo_agent_kwargs(agent_config, session_config)
+        )
     if restore_path:
         agent.restore_model(directory=restore_path)
     return agent
