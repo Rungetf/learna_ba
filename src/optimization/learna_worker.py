@@ -254,7 +254,7 @@ class LearnaWorker(Worker):
 
         config_space.add_hyperparameter(
             CS.UniformIntegerHyperparameter(
-                "embedding_size", lower=0, upper=8, default_value=1  # FR: changed embedding size upper from 4 to 8
+                "embedding_size", lower=0, upper=9, default_value=1  # FR: changed embedding size upper from 4 to 8
             )
         )
 

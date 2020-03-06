@@ -12,8 +12,8 @@ cd learna_ba
 
 source thirdparty/miniconda/miniconda/bin/activate analysis
 
-mkdir -p analysis/bohb
+mkdir analysis/bohb/${MOAB_JOBID}
 
-python -m src.analyse.analyse_bohb_results --path ${WSPATH} --run 6538964 --out_dir ${ANAPATH} --mode 4 --n 5
+python -m src.analyse.analyse_bohb_results --path ${WSPATH} --run 6782535 --out_dir ${ANAPATH}/${MOAB_JOBID} --mode meta-freinet --n 10
 
-cp -r /work/ws/nemo/fr_ds371-learna-0/analysis/bohb/* analysis/bohb
+cp -r /work/ws/nemo/fr_ds371-learna-0/analysis/bohb/${MOAB_JOBID}/* analysis/bohb/${MOAB_JOBID}

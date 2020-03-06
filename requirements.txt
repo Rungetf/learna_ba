@@ -17,7 +17,7 @@ dataclasses==0.6
 Distance==0.1.3
 docutils==0.14
 enum34==1.1.6
-fanova==2.0.14.dev0
+fanova==2.0.13
 hpbandster==0.7.4
 html5lib==0.9999999
 idna==2.8
@@ -44,7 +44,7 @@ pylint==2.3.1
 pynisher==0.5.0
 pyOpenSSL==19.0.0
 pyparsing==2.4.2
-pyrfr==0.8.0
+pyrfr==0.7.0
 Pyro4==4.76
 PySocks==1.7.1
 pytest==4.6.2

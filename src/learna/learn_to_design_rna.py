@@ -162,7 +162,7 @@ if __name__ == "__main__":
     parser.add_argument("--predict_pairs", action="store_true", help="Choose if Actions are used to directly predict watson-crick base pairs")
     parser.add_argument("--state_representation", type=str, default='n-gram', help="Choose between n-gram and sequence_progress to show the nucleotides already placed in the state")
     parser.add_argument("--data_type", type=str, default='random', help="Choose type of training data, random motifs or motifs with balanced brackets")
-
+    parser.add_argument("--sequence_constraints", type=str, default='-', help="Perform local design with knowledge about sequence")
 
 
     args = parser.parse_args()
@@ -196,6 +196,7 @@ if __name__ == "__main__":
         predict_pairs=args.predict_pairs,
         state_representation=args.state_representation,
         data_type=args.data_type,
+        sequence_constraints=args.sequence_constraints,
         # structure_only=args.structure_only,
         # training_data=args.training_data,
     )

@@ -139,7 +139,7 @@ experiment-test:
 	python -m src.learna.design_rna \
 	--dataset 'rfam_local_validation' \
 	--data_dir 'data' \
-	--target_structure_ids 5 \
+	--target_structure_path 'data/12.rna' \
 	--mutation_threshold 5 \
 	--batch_size 75 \
 	--conv_sizes 0 0 \
@@ -156,6 +156,7 @@ experiment-test:
 	--reward_function "sequence_and_structure" \
 	--local_design \
 	--state_representation "n-gram" \
+	--predict_pairs \
 	--data_type "random"
 	# --restart_timeout 1800
 	# --predict_pairs
@@ -246,14 +247,24 @@ nemo-test-%:
 		--task_id 1
 
 ## Start experiment on the Rfam Taneda benchmark
-nemo-rfam-taneda-%:
+nemo-rfam-local-if-%:
 	msub utils/rna_single.moab \
-		-l walltime=1200 \
-		-t 1-1450 \
+		-l walltime=6000 \
+		-t 1-500 \
 		-v METHOD=$* \
-		-v DATASET=rfam_taneda \
-		-v TIMEOUT=600 \
-		-v EXPERIMENT_GROUP=thesis_LEARNA_gc_01
+		-v DATASET=rfam_learn_test \
+		-v TIMEOUT=3600 \
+		-v EXPERIMENT_GROUP=partial_rna_design
+
+## Start experiment on the Eterna100 benchmark
+nemo-eterna-%:
+	msub utils/rna_single.moab \
+		-l walltime=100000 \
+		-t 1-500 \
+		-v METHOD=$* \
+		-v DATASET=eterna \
+		-v TIMEOUT=86400 \
+		-v EXPERIMENT_GROUP=partial_rna_design
 
 ## Start experiment on the Rfam Taneda benchmark
 nemo-rna-local-%:
@@ -261,9 +272,9 @@ nemo-rna-local-%:
 		-l walltime=6000 \
 		-t 1-500 \
 		-v METHOD=$* \
-		-v DATASET=rfam_local_test \
+		-v DATASET=rfam_local_min_1000_test_gaps \
 		-v TIMEOUT=3600 \
-		-v EXPERIMENT_GROUP=rna_local_design
+		-v EXPERIMENT_GROUP=partial_rna_design
 
 
 ################################################################################

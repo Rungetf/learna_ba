@@ -16,6 +16,8 @@ dependencies:
   - scipy
   - matplotlib
   - gcc_linux-64
+  - gxx_linux-64
+  - swig
   - libgcc-ng
   - pip:
     - appdirs==1.4.3
