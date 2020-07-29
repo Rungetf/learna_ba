@@ -64,9 +64,13 @@ reports/thesis/out/thesis_main.*
 **/*.out
 **/*.pdf
 packages/
+setup_FR.tex
 
 #visualization
 visualization/
+
+#experiments
+experiment_ids.txt
 
 #verification
 verification/
