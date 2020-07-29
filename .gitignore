@@ -41,10 +41,6 @@ plots*
 other_plots*
 other_pgf*
 
-# misc
-*__pycache__/
-.pytest_cache/
-
 # latex
 reports/thesis/thesis_main.aux
 reports/thesis/thesis_main.bbl
@@ -67,9 +63,15 @@ reports/thesis/out/thesis_main.*
 **/*.log
 **/*.out
 **/*.pdf
+packages/
+
+#visualization
+visualization/
 
 #verification
 verification/
 
 #misc
 thoughts.txt
+*__pycache__/
+.pytest_cache/
