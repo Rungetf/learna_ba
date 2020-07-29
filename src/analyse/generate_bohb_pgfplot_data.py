@@ -100,6 +100,13 @@ def nas_vs_loss(result, path, run, out_dir):
     lstm_cnn_fc_df = lstm_cnn_fc_df[['fc', 'loss']]
     lstm_cnn_fc_df['fc'] = lstm_cnn_fc_df.index
 
+    embedding = [(embedding, loss) for embedding, loss in zip(data[0].embedding_size, data[1].loss)]
+    embedding_df = pd.DataFrame(embedding, columns=['embedding', 'loss'])
+    embedding_y_df = embedding_df.where(lambda x: x.embedding != 0).dropna()
+    embedding_n_df = embedding_df.where(lambda x: x.embedding == 0).dropna()
+    embedding_y_df['embedding'] = embedding_y_df.index
+    embedding_n_df['embedding'] = embedding_n_df.index
+
     path = Path(out_dir, run, 'NAS')
     path.mkdir(exist_ok=True, parents=True)
 
@@ -107,6 +114,69 @@ def nas_vs_loss(result, path, run, out_dir):
     lstm_and_fc_df.to_csv(path_or_buf=Path(path, 'lstm.tsv'), sep='\t', index=False)
     cnn_and_fc_df.to_csv(path_or_buf=Path(path, 'conv.tsv'), sep='\t', index=False)
     lstm_cnn_fc_df.to_csv(path_or_buf=Path(path, 'lstm_cnn_fc.tsv'), sep='\t', index=False)
+    embedding_y_df.to_csv(path_or_buf=Path(path, 'embedding.tsv'), sep='\t', index=False)
+    embedding_n_df.to_csv(path_or_buf=Path(path, 'no_embedding.tsv'), sep='\t', index=False)
+
+
+def dataset_vs_loss(result, path, run, out_dir):
+    data = result.get_pandas_dataframe()
+
+    datasets = [(trainingset, loss) for trainingset, loss in zip(data[0].trainingset, data[1].loss)]
+    data_df = pd.DataFrame(datasets, columns=['trainingset', 'loss'])
+
+    random_df = data_df.where(lambda x: x.trainingset == 'rfam_local_train').dropna()
+    random_df['trainingset'] = random_df.index
+
+    short_df = data_df.where(lambda x: x.trainingset == 'rfam_local_short_train').dropna()
+    short_df['trainingset'] = short_df.index
+
+    long_df = data_df.where(lambda x: x.trainingset == 'rfam_local_long_train').dropna()
+    long_df['trainingset'] = long_df.index
+
+    path = Path(out_dir, run, 'trainingset')
+    path.mkdir(exist_ok=True, parents=True)
+
+    random_df.to_csv(path_or_buf=Path(path, 'random.tsv'), sep='\t', index=False)
+    short_df.to_csv(path_or_buf=Path(path, 'short.tsv'), sep='\t', index=False)
+    long_df.to_csv(path_or_buf=Path(path, 'long.tsv'), sep='\t', index=False)
+
+
+def curricula_vs_loss(result, path, run, out_dir):
+    data = result.get_pandas_dataframe()
+
+    curricula = [(curriculum, loss) for curriculum, loss in zip(data[0].data_type, data[1].loss)]
+    curricula_df = pd.DataFrame(curricula, columns=['curriculum', 'loss'])
+
+    random_df = curricula_df.where(lambda x: x.curriculum == 'random').dropna()
+    random_df['curriculum'] = random_df.index
+
+    sort_df = curricula_df.where(lambda x: x.curriculum == 'random-sort').dropna()
+    sort_df['curriculum'] = sort_df.index
+
+    path = Path(out_dir, run, 'curricula')
+    path.mkdir(exist_ok=True, parents=True)
+
+    random_df.to_csv(path_or_buf=Path(path, 'random.tsv'), sep='\t', index=False)
+    sort_df.to_csv(path_or_buf=Path(path, 'sort.tsv'), sep='\t', index=False)
+
+def state_vs_loss(result, path, run, out_dir):
+    data = result.get_pandas_dataframe()
+
+    states = [(state, loss) for state, loss in zip(data[0].state_representation, data[1].loss)]
+    states_df = pd.DataFrame(states, columns=['state', 'loss'])
+
+    structure_df = states_df.where(lambda x: x.state == 'n-gram').dropna()
+    structure_df['state'] = structure_df.index
+
+    sequence_df = states_df.where(lambda x: x.state == 'sequence_progress').dropna()
+    sequence_df['state'] = sequence_df.index
+
+    path = Path(out_dir, run, 'state_representation')
+    path.mkdir(exist_ok=True, parents=True)
+
+    structure_df.to_csv(path_or_buf=Path(path, 'structure.tsv'), sep='\t', index=False)
+    sequence_df.to_csv(path_or_buf=Path(path, 'sequence.tsv'), sep='\t', index=False)
+
 
 if __name__ == '__main__':
     import argparse
@@ -140,3 +210,13 @@ if __name__ == '__main__':
 
     print('NAS vs loss')
     nas_vs_loss(result, args.path, args.run, args.out_dir)
+
+    print('State vs loss')
+    state_vs_loss(result, args.path, args.run, args.out_dir)
+
+    # LEARNA run does not have dataset and curriculum
+    # print('Trainingset vs loss')
+    # dataset_vs_loss(result, args.path, args.run, args.out_dir)
+
+    # print('Curricula vs loss')
+    # curricula_vs_loss(result, args.path, args.run, args.out_dir)

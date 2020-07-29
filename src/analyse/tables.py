@@ -228,4 +228,5 @@ if __name__ == "__main__":
     results = ExperimentGroupResults(
         args.experiment_group.resolve(), args.results_dir.resolve()
     )
+    print('to latex')
     results.to_latex(column_format=args.column_format, compile_ready=args.compile_ready)

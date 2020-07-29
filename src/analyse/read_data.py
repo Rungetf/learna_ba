@@ -35,7 +35,12 @@ def read_data_from_method_path(data_path, timeout):
         for run_path in data_path.glob("run-*")
     ]
     sequence_results = flatten_list(sequence_results_per_run)
-    runs, ids, times = zip(*sequence_results)
+    try:
+        runs, ids, times = zip(*sequence_results)
+    except:
+        runs = None
+        ids = []
+        times = []
     return runs, ids, times
 
 

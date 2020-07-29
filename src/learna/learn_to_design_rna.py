@@ -17,7 +17,7 @@ def episode_finished(stats):
     Returns:
        True, meaning to continue running.
     """
-    # print(stats)
+    print(stats)
     return True
 
 

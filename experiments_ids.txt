@@ -6,6 +6,8 @@ OPTIMIZATION:
 
 6511133  -> restart learna 2 day optimization for sequence reward decision, changed logging to warning, changed float parameter for sequence_reward to integer between 0, 1. should work now
 
+
+
 AUTO RL:
 ========
 
@@ -22,8 +24,24 @@ FREINET:
 6717714  -> Meta-LEARNAfreinet 4 days optimization  -> I'll keep this one running until I realize that something is wrong.
 6717715  -> Meta-LEARNA-Adaptfreinet 4 days optimization  -> something went wrong, I'll restart it...
 
-6737349  -> rerun autoLEARNAfreinet 4 days optimization --> excluding motif based data
+6737349  -> rerun autoLEARNAfreinet 4 days optimization --> excluding motif based data  -> Canceled, due to LIS bug!!!!!
 6737353  -> rerun autoMeta-LEARNA-Adaptfreinet 4 days optimization --> excluding motif based data
+
+6782534  -> Meta-LEARNAfreinet 4 days optimization --> fixed bug in LIS, LIS now working
+6782535  -> Meta-LEARNA-Adaptfreinet 4 days optimization --> fixed bug in LIS, LIS now working
+6782536  -> LEARNAfreinet 4 days optimization --> fixed bug in LIS, LIS now working
+
+7022664  -> Meta-LEARNA with fixed algorithm and predict pairs, sum of min distances, new interface, new pairing_encoding, with n hamming distance 4 days  -----> canceled because of printing in the code and no more space on disk; ran for 512 iterations before stopping, data available
+7022665  -> Meta-LEARNA-Adapt with fixed algorithm and predict pairs, sum of min distances, new interface, new pairing_encoding, with n hamming distance 4 days   27.11.2019 ~ 22:52  -----> canceled because of printing in the code and no more space on disk
+7022666  -> LEARNA with fixed algorithm and predict pairs, sum of min distances, new interface, new pairing_encoding, with n hamming distance 4 days  -----> canceled because of printing in the code and no more space on disk
+
+7031046  -> Meta-LEARNA with rewqard and pair selection, new interface, new pairing_encoding, with n hamming distance 4 days       -----> canceled, wrong pairing encoding!!!!
+7031111  -> Meta-LEARNA-Adapt with rewqard and pair selection, new interface, new pairing_encoding, with n hamming distance 4 days       -----> canceled, wrong pairing encoding!!!!
+7031119  -> LEARNA with rewqard and pair selection, new interface, new pairing_encoding, with n hamming distance 4 days       -----> canceled, wrong pairing encoding!!!!
+
+7052569  -> new implementation of pairing_encoding, now no bug anymore; changed action semantics, s.t. first nucleotide of pair assignment corresponds with single nucleotides; Meta-LEARNA with rewqard and pair selection, new interface, new pairing_encoding, with n hamming distance 4 days
+7052570  -> new implementation of pairing_encoding, now no bug anymore; changed action semantics, s.t. first nucleotide of pair assignment corresponds with single nucleotides; Meta-LEARNA-Adapt with rewqard and pair selection, new interface, new pairing_encoding, with n hamming distance 4 days
+7052571  -> new implementation of pairing_encoding, now no bug anymore; changed action semantics, s.t. first nucleotide of pair assignment corresponds with single nucleotides; LEARNA with rewqard and pair selection, new interface, new pairing_encoding, with n hamming distance 4 days
 
 
 PEAK PERFORMANCE VIA JOINT OPTIMIZATION:
@@ -38,6 +56,9 @@ PEAK PERFORMANCE VIA JOINT OPTIMIZATION:
 
 6703893  -> LEARNA optimization 4 days reward=structure_only, predict_pairs=1, sum of min distances
 6703894  -> Meta-LEARNA optimization 4 days: reward=structure_only, predict_pairs=True, sum of min distances
+
+4 days Meta-LEARNA-Adapt:
+6826895  -> 4 day meta-learna-adapt, wait for 10 worker, 5 minutes validation, reward=structure_only, predict_pairs=True, still searching for data + curriculum and individual state composition
 
 
 
@@ -68,7 +89,30 @@ all errored or wrong config!!!!!! --> 6709957 --> Meta-learna_peak 2 days 666370
 6712851  -> 6576532_482_0_0_adapt
 6712852  -> 6663703_156_0_7_adapt
 6712853  -> 6703894_507_0_6_adapt
-rfam_local_min_400_masx_1000_test:
+
+6824015  -> 6782534_414_0_5
+6824052  -> 6782535_312_0_8 --> adapt!!!
+
+6878955  -> 6826895_280_0_1 --> Meta-Freinet-Adapt-fine-tune
+6876646  -> 6782536_408_0_22 --> Freinet
+
+6929362  -> run with sequence_constraints    ->    Meta-FreiNET  6782534_414_0_5_c                --> this was sequence_constraints but reward was local not global structure
+6929364  -> run with sequence_constraints    ->    Meta-FreiNET-Adapt  6782535_312_0_8_c          --> this was sequence_constraints but reward was local not global structure
+6929365  -> run with sequence_constraints    ->    FreiNET  6782536_408_0_22_c                    --> this was sequence_constraints but reward was local not global structure
+6929366  -> run with sequence_constraints    ->    Meta-FreiNET-Adapt-Fine 6826895_280_0_1_c      --> this was sequence_constraints but reward was local not global structure
+
+6974551  -> run with sequence_constraints    ->    Meta-FreiNET  6782534_414_0_5_c
+6974552  -> run with sequence_constraints    ->    Meta-FreiNET-Adapt  6782535_312_0_8_c
+6974553  -> run with sequence_constraints    ->    FreiNET  6782536_408_0_22_c
+6974554  -> run with sequence_constraints    ->    Meta-FreiNET-Adapt-Fine 6826895_280_0_1_c
+
+7062550  -> 7052569_471_0_8  autoMeta-LEARNA
+7062562  -> 7052570_212_0_0  autoMeta-LEARNA-Adapt
+7070269  -> 7052571_188_0_3  autoLEARNA
+
+
+
+rfam_local_min_400_max_1000_test:
 ----------------------------------
 
 6710735  -> antarna_local 3600; 5 attempts
@@ -78,6 +122,26 @@ rfam_local_min_400_masx_1000_test:
 
 6710741  -> LEARNA 2 day peak performance bohb run config 6663702_172_0_13 = Incumbent
 6710742  -> Meta-LEARNA 2 day peak performance bohb run config 6663703_156_0_7 = Incumbent
+
+6824144  -> 6782534_414_0_5
+6824206  -> 6782535_312_0_8
+
+6879002  -> 6826895_280_0_1 --> Meta-Freinet-Adapt-fine-tune
+6879141  -> 6782536_408_0_22 --> Freinet
+
+6929681 -> run with sequence constraints 6782534_414_0_5_c  --> this was sequence_constraints but reward was local not global structure
+6929683 -> run with sequence constraints 6782535_312_0_8_c  --> this was sequence_constraints but reward was local not global structure
+6929684 -> run with sequence constraints 6782536_408_0_22_c --> this was sequence_constraints but reward was local not global structure
+6929686 -> run with sequence constraints 6826895_280_0_1_c  --> this was sequence_constraints but reward was local not global structure
+
+6977952  -> run with sequence_constraints    ->    Meta-FreiNET  6782534_414_0_5_c
+6977953  -> run with sequence_constraints    ->    Meta-FreiNET-Adapt  6782535_312_0_8_c
+6977954  -> run with sequence_constraints    ->    FreiNET  6782536_408_0_22_c
+6977955  -> run with sequence_constraints    ->    Meta-FreiNET-Adapt-Fine 6826895_280_0_1_c
+
+7063144  -> 7052569_471_0_8
+7063145  -> 7052570_212_0_0
+7070271  -> 7052571_188_0_3
 
 rfam_local_min_1000_test:
 -------------------------
@@ -90,12 +154,204 @@ rfam_local_min_1000_test:
 6710749  -> LEARNA 2 day peak performance bohb run config 6663702_172_0_13 = Incumbent
 6710752  -> Meta-LEARNA 2 day peak performance bohb run config 6663703_156_0_7 = Incumbent
 
+6824383  -> 6782534_414_0_5
+6824413  -> 6782535_312_0_8
+
+6879048  -> 6826895_280_0_1 --> Meta-Freinet-Adapt-fine-tune
+6879186  -> 6782536_408_0_22 --> Freinet
+
+6937045 -> run with sequence constraints 6782534_414_0_5_c   --> this was sequence_constraints but reward was local not global structure
+6937046 -> run with sequence constraints 6782535_312_0_8_c   --> this was sequence_constraints but reward was local not global structure
+6937048 -> run with sequence constraints 6782536_408_0_22_c  --> this was sequence_constraints but reward was local not global structure
+6937049 -> run with sequence constraints 6826895_280_0_1_c   --> this was sequence_constraints but reward was local not global structure
+
+  -> run with sequence_constraints    ->    Meta-FreiNET  6782534_414_0_5_c
+  -> run with sequence_constraints    ->    Meta-FreiNET-Adapt  6782535_312_0_8_c
+  -> run with sequence_constraints    ->    FreiNET  6782536_408_0_22_c
+  -> run with sequence_constraints    ->    Meta-FreiNET-Adapt-Fine 6826895_280_0_1_c
 
 
+7063721  -> 7052569_471_0_8
+7063722  -> 7052570_212_0_0
+7070332  -> 7052571_188_0_3
+
+rfam_taneda_local_test:
+-----------------------
+
+6884409  -> run 6782534_414_0_5 --> solved 100 % of taneda benchmark!!!; new run with output only solves 23 sequences (state of the art for mcts!!!)
+6884410  -> run 6782535_312_0_8
+6884411  -> run 6782536_408_0_22
+6884413  -> run 6826895_280_0_1
+
+6885031  -> run 6782534_414_0_5 with output :DDD
+
+eterna_local_test:
+------------------
+
+6885294  -> run 6782534_414_0_5
+6885295  -> run 6782535_312_0_8
+6885297  -> run 6782536_408_0_22
+
+6885304  -> run 6826895_280_0_1
+
+
+
+7062567  -> 7052569_471_0_8
+7062573  -> 7052570_212_0_0
+7070247  -> 7052571_188_0_3
+
+Rfam-Learn-Test:
+-----------------
+
+7062638  -> 7052569_471_0_8   -------> errored due to zero-division error during data acquisition. Why was that again? :)
+7062639  -> 7052570_212_0_0   -------> errored due to zero-division error during data acquisition. Why was that again? :)
+
+7070372  -> 7052569_471_0_8   -------> errored due to zero-division error during data acquisition. Why was that again? :)
+7070374  -> 7052570_212_0_0   -------> errored due to zero-division error during data acquisition. Why was that again? :)
+-> 7052571_188_0_3
+
+
+Rfam_anta-sc:
+-------------
+
+7064752  -> antarna-local baseline run: 5 attempts a 10 minutes
+7063268  -> 7052569_471_0_8: 5 attempts a 10 mintutes
+7063269  -> 7052570_212_0_0: 5 attempts a 10 mintutes
+7070340  -> 7052571_188_0_3
+
+Rfam-local-test-sc:
+-------------------
+
+7063433  -> 7052569_471_0_8
+7063434  -> 7052570_212_0_0
+7070333  -> 7052571_188_0_3
+
+Rfam-local-min-400-max-1000-test-sc:
+---------------------------------------
+
+7063885  -> 7052569_471_0_8
+7063886  -> 7052570_212_0_0
+7070335  -> 7052571_188_0_3
+
+
+Rfam-local-min-1000-test-sc:
+---------------------------------------
+
+7063888  -> 7052569_471_0_8
+7063891  -> 7052570_212_0_0
+7070339  -> 7052571_188_0_3
+
+
+Rfam-local-test-if:
+-------------------
+
+7063426  -> antarna
+7063403  -> eastman
+7063427  -> mcts
+7063428  -> rnainverse
+7063523  -> Meta-LEARNA; 4839283_224_0_1
+
+7063431  -> 7052569_471_0_8
+7063432  -> 7052570_212_0_0
+7070267  -> 7052571_188_0_3
+
+
+Rfam_local-min-400-max-1000-test-if:
+-------------------------------------
+7063485 ->  rnainverse
+7063496 ->  eastman
+7063498 ->  mcts
+7063500 ->  antarna
+7063526 ->  Meta-LEARNA
+
+
+7063476  -> 7052569_471_0_8
+7063477  -> 7052570_212_0_0
+7070334  -> 7052571_188_0_3  -------> errored, rerun, zerodivision error.... ?!?wtf?!?
+7070337  -> 7052571_188_0_3
+
+Rfam_local-min-1000-test-if:
+----------------------------
+
+7063527  -> 7052569_471_0_8
+7063528  -> 7052570_212_0_0
+7070336  -> 7052571_188_0_3
+
+7063700  -> RNAInverse
+7063701  -> eastman
+7063702  -> mcts
+7063703  -> antarna
+7063706  -> Meta-LEARNA
+
+Rfam-local-test-gaps:
+----------------------
+
+7070415  -> 7052569_471_0_8
+7070465  -> 7052570_212_0_0
+7070471  -> 7052571_188_0_3
+
+Rfam-local-min-400-max-1000-test-gaps:
+----------------------
+
+7070519  -> 7052569_471_0_8
+7070532  -> 7052570_212_0_0
+7070542  -> 7052571_188_0_3
+
+Rfam-local-min-1000-test-gaps:
+----------------------
+
+7070749  -> 7052569_471_0_8
+7070769  -> 7052570_212_0_0
+7070781  -> 7052571_188_0_3
 
 
 FANOVA:
 =======
 
 
-6700046  -> 6538964 fANOVA 5 most important pairwise marginal plot generation on nemo
+6700046  -> 6538964 fANOVA 5 most important pairwise marginal plot generation on nemo --> errored, trying with new analysis env
+
+
+6883122  -> freinet run 6782536; 10 most important pairwise marginals
+6883123  -> meta-freinet run 6782534 (auto-meta-learna)
+6883124  -> meta-freinet-adapt; run 6782635
+6883125  -> meta-freinet-adapt-fine-tune; run 6826895 (auto-meta-learna-adapt-fine-tune)
+
+
+6902163  -> freinet run 6782536; all marginals + pairwise marginals + importance
+6902165  -> meta-freinet run 6782534; all marginals + pairwise marginals + importance
+6902166  -> meta-freinet-adapt run 6782535; all marginals + pairwise marginals + importance
+6902167  -> meta-freinet-adapt-fine-tune; run 6826895; all marginals + pairwise marginals + importance
+
+
+Ablation:
+=========
+
+Rfam-local-test:
+----------------
+
+7067977  -> random agent
+
+7068415  -> 7052569_471_0_8_no_lis
+7068454  -> 7052570_212_0_0_no_lis
+7069463  -> 7052569_471_0_8_no_pair
+7069464  -> 7052570_212_0_0_no_pair
+7070343  -> 7052571_188_0_3_no_lis
+7070344  -> 7052571_188_0_3_no_pair
+7070370  -> 7052571_188_0_3_no_restart
+
+Rfam-local-test-if:
+--------------------
+
+7067987 -> random agent
+
+7068457  -> 7052569_471_0_8_no_lis
+7068458  -> 7052570_212_0_0_no_lis
+
+Rfam-local-test-sc:
+-------------------
+
+7068216  -> random agent
+
+7068463  -> 7052569_471_0_8_no_lis
+7068464  -> 7052570_212_0_0_no_lis

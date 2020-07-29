@@ -8,6 +8,7 @@ from fanova import fANOVA
 import fanova.visualizer
 from pathlib import Path
 import ConfigSpace as CS
+import itertools as it
 
 
 def get_meta_freinet_config():
@@ -93,7 +94,7 @@ def get_meta_freinet_config():
 
     config_space.add_hyperparameter(
         CS.UniformIntegerHyperparameter(
-            "embedding_size", lower=0, upper=8, default_value=1  # FR: changed embedding size upper from 4 to 8
+            "embedding_size", lower=0, upper=9, default_value=1  # FR: changed embedding size upper from 4 to 8
         )
     )
 
@@ -212,7 +213,7 @@ def get_freinet_config():
 
     config_space.add_hyperparameter(
         CS.UniformIntegerHyperparameter(
-            "embedding_size", lower=0, upper=8, default_value=1  # FR: changed embedding size upper from 4 to 8
+            "embedding_size", lower=0, upper=9, default_value=1  # FR: changed embedding size upper from 4 to 8
         )
     )
 
@@ -263,7 +264,40 @@ def get_freinet_config():
 
     return config_space
 
-
+#     config_space.add_hyperparameter(
+#         CS.UniformFloatHyperparameter(
+#             "reward_exponent", lower=1, upper=12, default_value=1  # FR: changed reward_exponent upper from 10 to 12, ICLR: Learna (9.34), Meta-LEARNA (8.93)
+#         )
+#     )
+# 
+#     config_space.add_hyperparameter(
+#         CS.UniformFloatHyperparameter(
+#             "state_radius_relative", lower=0, upper=1, default_value=0
+#         )
+#     )
+# 
+#     # parameters for the architecture
+#     config_space.add_hyperparameter(
+#         CS.UniformIntegerHyperparameter(
+#             "conv_radius1", lower=0, upper=8, default_value=1
+#         )
+#     )
+#     config_space.add_hyperparameter(
+#         CS.UniformIntegerHyperparameter(
+#             "conv_channels1", lower=1, upper=32, log=True, default_value=32
+#         )
+#     )
+# 
+#     config_space.add_hyperparameter(
+#         CS.UniformIntegerHyperparameter(
+#             "conv_radius2", lower=0, upper=4, default_value=0
+#         )
+#     )
+#     config_space.add_hyperparameter(
+#         CS.UniformIntegerHyperparameter(
+#             "conv_channels2", lower=1, upper=32, log=True, default_value=1
+#         )
+#     )
 
 
 def get_fine_tuning_config():
@@ -349,7 +383,25 @@ def get_fine_tuning_config():
 
     config_space.add_hyperparameter(
         CS.UniformIntegerHyperparameter(
-            "embedding_size", lower=0, upper=8, default_value=1  # FR: changed embedding size upper from 4 to 8
+            "embedding_size", lower=0, upper=9, default_value=1  # FR: changed embedding size upper from 4 to 8
+        )
+    )
+
+    config_space.add_hyperparameter(
+        CS.CategoricalHyperparameter(
+            "state_representation", choices=['n-gram', 'sequence_progress']
+        )
+    )
+
+    config_space.add_hyperparameter(
+        CS.CategoricalHyperparameter(
+            "trainingset", choices=['rfam_local_short_train', 'rfam_local_train', 'rfam_local_long_train']
+        )
+    )
+
+    config_space.add_hyperparameter(
+        CS.CategoricalHyperparameter(
+            "data_type", choices=['random', 'random-sort']
         )
     )
 
@@ -424,11 +476,13 @@ def analyse_bohb_run(run):
     # # df = result.get_pandas_dataframe()
     # # print(df)
 
-    min_solved = 15
+    min_solved = 0
 
     all_solved = [(x.info['validation_info']['num_solved'], x.config_id, id2conf[x.config_id]['config']) for x in all_runs if x.info and int(x.info['validation_info']['num_solved']) >= min_solved]
     # # print(all_solved)
     all_solved_sorted = sorted(all_solved, key=lambda x: x[0], reverse=True)
+
+    print(f"number of configurations evaluated: {len(all_solved)}")
 
     print(f"{len(all_solved_sorted)} configurations solved at least {min_solved} targets:")
 
@@ -449,51 +503,134 @@ def analyse_bohb_run(run):
 
 
 
-def generate_fanova_plots(path, run, out_dir, mode, n):
+def generate_fanova_plots(path, run, out_dir, mode, n, param):
     # load the example run from the log files
     result = hpres.logged_results_to_HBS_result(f"{path}/{run}")
 
-    if mode == 'freinet':
+    # param = "reward_function"
+
+    if mode == 'autoLEARNA':
         cs = get_freinet_config()
-    elif mode == 'meta-freinet':
+    elif mode == 'autoMeta-LEARNA':
         cs = get_meta_freinet_config()
     else:
-        cs = get_fine_tuning_config()
+        raise
     print('generate fanova data')
     a, b, _ = result.get_fANOVA_data(cs)
-    b = np.array([np.float64(x) for x in b])
+    b = np.array([100 - np.float64(x) for x in b])
     print('create fanova object')
     f = fANOVA(a, b, cs)
     print('create visualizer')
     path = Path(out_dir)
     path.mkdir(parents=True, exist_ok=True)
     vis = fanova.visualizer.Visualizer(f, cs, directory=path)
+    hp_importances = []
     print('computing importance of parameters')
-    importance = f.quantify_importance(dims=cs.get_hyperparameter_names())
-    with open(path, 'w+') as imp:
-        imp.write(str(importance))
-    print(importance)
-    print('generate plots')
-    vis.create_most_important_pairwise_marginal_plots(n=n)
     for i in range(1, len(cs.get_hyperparameter_names())):
+        print(f"Computing importance of {cs.get_hyperparameter_by_idx(i)}")
+        importance = f.quantify_importance(dims=[cs.get_hyperparameter_by_idx(i)])[(cs.get_hyperparameter_by_idx(i), )]
+        print(f"total importance: {importance['total importance']}")
+        hp_name = cs.get_hyperparameter_by_idx(i)
+        # print(hp_name)
+        total_importance = importance['total importance']
+        # print(total_importance)
+        individual_importance = importance['individual importance']
+        # print(individual_importance)
+        individual_std = importance['individual std']
+        # print(individual_std)
+        total_std = importance['total std']
+        # print(total_importance)
+        # print('\n')
+        hp_importances.append((hp_name, total_importance, total_std, individual_importance, individual_std))
+        # print(hp_importances)
+        print(f"generate marginal plot for hyperparameter: {cs.get_hyperparameter_by_idx(i)}")
         try:
-            print(f"generate marginal plot for hyperparameter: {cs.get_hyperparameter_by_idx(i)}")
-            fig = vis.plot_marginal(param=i, show=False)
-            fig.savefig(Path(path, f"{cs.get_hyperparameter_by_idx(i)}"))
-            fig.close()
-        except Exception as e:
-            print(e)
-    for i in range(1, len(cs.get_hyperparameter_names())):
-        for j in range(1, len(cs.get_hyperparameter_names())):
-            try:
-                if i != j:
-                    print(f"generate pairwise marginal plot for hyperparameters: {cs.get_hyperparameter_by_idx(i)} and {cs.get_hyperparameter_by_idx(j)}")
-                    fig = vis.plot_pairwise_marginal(param_list=(i, j), show=False)
-                    fig.savefig(Path(path, f"pairwiswe_marginal_{cs.get_hyperparameter_by_idx(i)}_{cs.get_hyperparameter_by_idx(j)}"))
-                    fig.close()
-            except Exception as e:
-                print(e)
+            log = cs.get_hyperparameter(cs.get_hyperparameter_by_idx(i)).log
+        except:
+            log = False
+        # print(f"log_scale is {log}")
+        fig = vis.plot_marginal(param=i, log_scale=log, show=False)
+        fig.savefig(Path('results', 'fanova', run, f"{cs.get_hyperparameter_by_idx(i)}"))
+        fig.close()
+    hp_importances = sorted(hp_importances, key=lambda x: x[1], reverse=True)
+    # print(hp_importances)
+    print('Writing importance files')
+    for hp_importance in hp_importances:
+        # print(hp_importance)
+        imps_path = Path('results', 'fanova', run, 'importances.txt')
+        imp_path = Path('results', 'fanova', run, f"importance_{hp_importance[0]}.txt")
+        with open(imp_path, 'w+') as imp:
+            # print(str(hp_importance[0])
+            imp.write(str(hp_importance[0]) + '\n')
+            # print(str(hp_importance[1])
+            imp.write('total importance: ' + str(hp_importance[1]) + '\n')
+            # print(str(hp_importance[2])
+            imp.write('total_std: ' + str(hp_importance[2]) + '\n')
+            # print(str(hp_importance[3])
+            imp.write('individual importance: ' + str(hp_importance[3]) + '\n')
+            # print(str(hp_importance[4])
+            imp.write('individual std: ' + str(hp_importance[4]) + '\n')
+        with open(imps_path, 'a+') as imps:
+            imps.write(str(hp_importance) + '\n')
+                # imps.write('\n')
+    # print(importance)
 
+        # print('generate plots')
+        # vis.create_most_important_pairwise_marginal_plots(n=n)
+        # for i in range(1, len(cs.get_hyperparameter_names())):
+        # try:
+        # except Exception as e:
+        #     print(e)
+    # for i in range(1, len(cs.get_hyperparameter_names())):
+    #     for j in range(1, len(cs.get_hyperparameter_names())):
+    #         try:
+    #             if i != j:
+    #                 print(f"generate pairwise marginal plot for hyperparameters: {cs.get_hyperparameter_by_idx(i)} and {cs.get_hyperparameter_by_idx(j)}")
+    #                 fig = vis.plot_pairwise_marginal(param_list=(i, j), show=False)
+    #                 fig.savefig(Path('results', 'fanova', run, f"pairwiswe_marginal_{cs.get_hyperparameter_by_idx(i)}_{cs.get_hyperparameter_by_idx(j)}"))
+    #                 fig.close()
+    #         except Exception as e:
+    #             print(e)
+
+    # # # getting the 10 most important pairwise marginals sorted by importance
+    # # best_margs = f.get_most_important_pairwise_marginals(n=10)
+    # # print(best_margs)
+    # # # creating the plot of pairwise marginal:
+    # # vis.plot_pairwise_marginal((0,2), resolution=20)
+    # # creating all plots in the directory
+
+
+def create_pairwise_marginals(path, run, out_dir, mode, params):
+    # load the example run from the log files
+    result = hpres.logged_results_to_HBS_result(f"{path}/{run}")
+
+    # param = "reward_function"
+
+    if mode == 'autoLEARNA':
+        cs = get_freinet_config()
+    elif mode == 'autoMeta-LEARNA':
+        cs = get_meta_freinet_config()
+    else:
+        raise
+    print('generate fanova data')
+    a, b, _ = result.get_fANOVA_data(cs)
+    b = np.array([100 - np.float64(x) for x in b])
+    print('create fanova object')
+    f = fANOVA(a, b, cs)
+    print('create visualizer')
+    path = Path(out_dir)
+    path.mkdir(parents=True, exist_ok=True)
+    vis = fanova.visualizer.Visualizer(f, cs, directory=path)
+    pairwise_parameters = it.permutations(params, 2)
+    for item in pairwise_parameters:
+        p1 = item[0]
+        p2 = item[1]
+        print(f"generate pairwise marginal plot for hyperparameters: {p1} and {p2}")
+        fig = vis.plot_pairwise_marginal(param_list=(cs.get_idx_by_hyperparameter_name(p1), cs.get_idx_by_hyperparameter_name(p2)), show=False)
+        fig.savefig(Path('results', 'fanova', run, f"pairwiswe_marginal_{p1}_{p2}"))
+        fig.close()
+    # print(f"Creating {n} most important pairwise marginal plots")
+    # vis.create_most_important_pairwise_marginal_plots(f"results/fanova/{run}/", n)
 
 if __name__ == '__main__':
     import argparse
@@ -513,16 +650,23 @@ if __name__ == '__main__':
     )
 
     parser.add_argument(
-        "--mode", type=str, help="Choose between freinet, meta-freinet, meta-freinet-fine-tuning day configs"
+        "--mode", type=str, help="Choose between autoLEARNA, autoMeta-LEARNA"
     )
 
     parser.add_argument(
         "--n", type=int, help="The number of most important marginal plots fanova should generate"
     )
 
+    parser.add_argument(
+        "--parameter", type=str, help="The parameter to analyse"
+    )
 
     args = parser.parse_args()
 
-    # analyse_bohb_run(args.run)
+    params = ['state_radius_relative', 'learning_rate', 'num_lstm_layers']
 
-    generate_fanova_plots(args.path, args.run, args.out_dir, args.mode, args.n)
+    analyse_bohb_run(args.run)
+
+    # generate_fanova_plots(args.path, args.run, args.out_dir, args.mode, args.n, args.parameter)
+
+    # create_pairwise_marginals(args.path, args.run, args.out_dir, args.mode, params)

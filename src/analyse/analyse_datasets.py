@@ -2,7 +2,7 @@ from pathlib import Path
 from collections import Counter
 import pandas as pd
 
-datasets = ['rfam_local_test', 'rfam_local_validation', 'rfam_local_train', 'rfam_learn_local_min_500_test', 'rfam_learn_local_min_100_max_500_test']
+datasets = ['rfam_local_test', 'rfam_local_validation', 'rfam_local_train', 'rfam_learn_local_min_500_test', 'rfam_learn_local_min_100_max_500_test', 'rfam_local_long_train', 'rfam_local_short_train', 'rfam_local_min_400_max_1000_test', 'rfam_local_min_1000_test']
 
 def get_dataset(data_path, dataset):
     return Path(data_path, dataset).glob('*.rna')
@@ -20,6 +20,8 @@ def analyse_datasets(data_path):
                 counter += 1
             length.append(len(path.read_text().split('\t')[1]))
         dataset_length_distribution = Counter(length)
+        print(f"Minimum length in {path.parent.stem}: {min([entry for entry in dataset_length_distribution])}")
+        print(f"Maximum length in {path.parent.stem}: {max([entry for entry in dataset_length_distribution])}")
         length_distributions[path.parent.stem] = dataset_length_distribution
     df = pd.DataFrame(length_distributions)
     # df = df.sorted()

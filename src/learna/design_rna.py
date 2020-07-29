@@ -2,6 +2,7 @@ import time
 
 import tensorflow as tf
 from ..tensorforce.runner import Runner
+from RNA import fold
 
 from .agent import NetworkConfig, get_network, AgentConfig, get_agent_fn
 from .environment import RnaDesignEnvironment, RnaDesignEnvironmentConfig
@@ -25,6 +26,7 @@ def _get_episode_finished(timeout, stop_once_solved):
 
         candidate_solution = env.design.primary
         last_reward = runner.episode_rewards[-1]
+        # folding = fold(candidate_solution)[0]
         # last_fractional_hamming = env.episodes_info[-1].normalized_hamming_distance
         # last_gc_content = env.episodes_info[-1].gc_content
         # agent_gc = env.episodes_info[-1].agent_gc

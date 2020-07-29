@@ -37,22 +37,12 @@ class RnaDesignEnvironmentConfig:
     state_radius: int = 5
     use_conv: bool = True
     use_embedding: bool = False
-    # gc_improvement_step: bool = False
-    # gc_tolerance: float = 0.04
-    # desired_gc: float = 0.5
-    # gc_weight: float = 1.0
-    # gc_reward: bool = False
     local_design: bool = False
-    # num_actions: int = 4
-    # keep_sequence: str = 'fully'
-    # sequence_reward: bool = False
     predict_pairs: bool = False
     reward_function: str = 'structure'
     state_representation: str = 'sequence-progress'
     data_type: str = 'random'
     sequence_constraints: str = None
-    # training: bool = False
-    # training_data: str = 'random'
 
 
 def _string_difference_indices(s1, s2):
@@ -96,7 +86,14 @@ def _encode_dot_bracket(secondary, env_config):
 
 
 def _encode_pairing(secondary):
-    """TODO
+    """
+    Encode the base pairing scheme of the design task.
+
+    Args:
+        secondary: the secondary structure (domain) that has to get encoded.
+
+    Returns:
+        List that contains the paired site for each site if exists, or None otherwise.
     """
     pairing_encoding = [None] * len(secondary)
     stack = []
@@ -113,51 +110,22 @@ def _encode_pairing(secondary):
     return pairing_encoding
 
 
-
-
-
-
-
-
-    # if stack == [] or closing_brackets == []:
-    #     return pairing_encoding
-    # # remove leading closing brackets
-    # min_s = min(stack)
-    # for site in closing_brackets.copy():
-    #     if site < min_s:
-    #         closing_brackets.remove(site)
-    #     if closing_brackets == []:
-    #         return pairing_encoding
-    # # remove trainling opening brackets
-    # max_c = max(closing_brackets)
-    # for site in stack.copy():
-    #     if site > max_c:
-    #         stack.remove(site)
-    #     if stack == []:
-    #         return pairing_encoding
-
-    # if len(stack) > len(closing_brackets) and stack != [] and closing_brackets != []:
-    #     stack = list(reversed(stack))
-    #     while not len(stack) == len(closing_brackets):
-    #         stack.pop()
-    # elif len(stack) < len(closing_brackets) and stack != [] and closing_brackets != []:
-    #     while not len(stack) == len(closing_brackets):
-    #         closing_brackets.pop()
-    #     stack = list(reversed(stack))
-    # elif len(stack) == len(closing_brackets) and stack != [] and closing_brackets != []:
-    #     stack = list(reversed(stack))
-
-    # for opening, closing in zip(stack, closing_brackets):
-    #     pairing_encoding[opening] = closing
-    #     pairing_encoding[closing] = opening
-    # return pairing_encoding
-
 def _encode_structure_parts(local_target):
+    """
+    Encodes the design task, to distinguish between struture and wequence domains.
+
+    Args:
+        A sequence that may contain structure or sequence parts.
+
+    Returns:
+        A list representation of the sequence with all structure sites and None else.
+    """
     encoding = [None] * len(local_target)
     for index, site in enumerate(local_target):
         if site in ['.', '(', ')', 'N']:
             encoding[index] = site
     return encoding
+
 
 #class ConstraintControler(object):
 #    """TODO
@@ -319,23 +287,19 @@ class _Target(object):
     def __init__(self, dot_bracket, env_config):
         """
         Initialize a target structure.
+        TODO: Make reading of the task more generic.
 
         Args:
-             dot_bracket: dot_bracket encoded target structure.
+             dot_bracket: the task information:
+                 position 0: id
+                 position 1: structure constraints
+                 position 2: sequence constraints
+                 position 3: gc content
+                 position 4: mfe
              env_config: The environment configuration.
         """
         _Target._id_counter += 1
         self._env_config = env_config
-        # try except required to handle rna design format from LEARNA. Can be removed for future
-        # max_data_index = len(dot_bracket) - 1
-        # self.id = _Target._id_counter
-
-        # if dot_bracket[0] in [str(i) for i in range()]
-
-        # self.dot_bracket = dot_bracket[0]
-        # self.sequence_constraints = dot_bracket[1]
-        #
-        # remove stuff above and uncomment stuff below after testing on anta data
 
         try:
             assert len(dot_bracket) == 5
@@ -345,7 +309,6 @@ class _Target(object):
             self.gc = dot_bracket[3]
             self.mfe = dot_bracket[4]
         except:
-            # if env_config.training:
             try:
                 self.id = dot_bracket[0]
                 self.dot_bracket = dot_bracket[3]
@@ -360,8 +323,6 @@ class _Target(object):
                  self.sequence_constraints = None
                  self.gc = None
                  self.mfe = None
-                 # print('Only dot bracket encoding provided')
-                 # print('Start RNA design')
 
         if not self.sequence_constraints:
             sequence_constraints = ['N' for _ in self.dot_bracket]
@@ -372,130 +333,55 @@ class _Target(object):
                     dot_bracket[index] = 'N'
             self.sequence_constraints = ''.join(sequence_constraints)
             self.dot_bracket = ''.join(dot_bracket)
-        # print(self.sequence_constraints)
-        # print(self.dot_bracket)
-        # _global = 'N' not in self.dot_bracket.replace('A', 'N').replace('C', 'N').replace('G', 'N').replace('U', 'N')
-        # if _global:
-        #     self._pairing_encoding = _encode_pairing(self.dot_bracket)
-        #     self.local_target = self.assign_sequence_constraints()
-        #     print(self.local_target)
-        # elif _local:
-        #     new_sequence_constraints = []
-        #     for site in self.local_target:
-        #         if site in ['A', 'C', 'G', 'U']:
-        #             new_sequence_constraints.append(site)
-        #         else:
-        #             new_sequence_constraints.append('N')
-        #     self.sequence_constraints = ''.join(new_sequence_constraints)
+
         self._current_site = 0
         self._partition = self.get_partition()
-        #print(self._partition)
         self.encode_partial_pairing()
         self.local_target = self.assign_sequence_constraints()
 
-        # if self._env_config.training:
-        #     self.local_target = dot_bracket[3]
-        #     self.dot_bracket = self.local_target
-        #     self._pairing_encoding = _encode_pairing(self.local_target)
-        #     self._current_site = 0
-        #     self._partition = self.get_partition()
-        #     self.sequence_constraints = self.tmp_generate_sequence_constraints()
         self.sequence_progress = self.local_target
         self.padded_encoding = _encode_dot_bracket(self.local_target, env_config)
-        # self.sequence = dot_bracket[2] if env_config.local_design and len(dot_bracket) >= 7 else None
-        # self.local_motif = dot_bracket[4] if env_config.local_design and len(dot_bracket) >= 7 else None
-        # if env_config.data_type == 'motif' or env_config.data_type == 'motif-sort':
-        #     self.local_target = self.local_motif
-        # print(dot_bracket[3])
-        # if env_config.sequence_constraints:
-        #     self._pairing_encoding = _encode_pairing(self.dot_bracket)
-        #     # self.sequence_constraints = self.tmp_generate_sequence_constraints()
-        # print(self.id)
-        # print(self.dot_bracket)
-        # print(self.sequence_constraints)
-        # print(self.local_target)
 
-        # self._current_site = 0
-        # self._partition = self.get_partition()
-        # self._sequence_progress = self.local_target
-        # print(f"t: {dot_bracket[1]}")
-        # print(f"s: {self.sequence_constraints}")
-        # print(f"p: {self.partition[0]}")
-        # print(f"p: {self.partition[1]}")
         if env_config.reward_function == 'structure_only':
             self.structure_parts_encoding = _encode_structure_parts(self.local_target)
-            # print(f"target_init: {self.structure_parts_encoding}")
-        # if self.verify_target():
-            # print('Complete partial target')
-        # else:
-            # raise
-            # print('Partial Target with gaps')
-        # print(f"In: {''.join([str(i) for i in range(len(self.dot_bracket))])}")
-        # print(f"db: {self.dot_bracket}")
-        # print(f"se: {self.sequence_constraints}")
-        # print(f"lt: {self.local_target}")
-        # for index, site in enumerate(self.dot_bracket):
-        #     print(f"{index}\t{site}\t{self._pairing_encoding[index]}")
+
 
     def encode_partial_pairing(self):
+        """
+        Calls _encode_pairing() for all structure parts of the structure constraints to get the pairing scheme correctly.
+        """
         self._pairing_encoding = [None] * len(self.dot_bracket)
-        # print(self.dot_bracket)
+
         for start, end in self.partition[1]:
-            # for index, site in enumerate(_encode_pairing(self.dot_bracket[start:end], start)):
-            # print(start)
-            # print(end)
             encoding = _encode_pairing(self.dot_bracket[start:end])
             for index, site in enumerate(encoding):
                 if site is not None:
                     self._pairing_encoding[index + start] = site + start
-        # print([c for c in self.dot_bracket])
-        # for index, c in enumerate(self._pairing_encoding):
-        #     print(self.self.dot_bracket[index])
-        # print(self.dot_bracket)
-        # for index, site in enumerate(self._pairing_encoding):
-        #     print(index, site)
-        # print(self._pairing_encoding)
-
-    def verify_target(self):
-        # print('verify')
-        # print(self.sequence_constraints)
-        # print(''.join([self.sequence_constraints[start:end] for start, end in self.partition[0]]))
-        # print(''.join([self.dot_bracket[start:end] for start, end in self.partition[1]]))
-        verification = []
-        for structure, sequence in zip(self.dot_bracket, self.sequence_constraints):
-            verification.append(structure != 'N' or sequence != 'N')
-        return all(verification)
-
-
-    def tmp_generate_sequence_constraints(self):
-        sequence_constraints = []
-        for site in self.local_target:
-            if site in ['A', 'C', 'G', 'U']:
-                sequence_constraints.append(site)
-            else:
-                sequence_constraints.append('N')
-        return ''.join(sequence_constraints)
 
     def assign_sequence_constraints(self):
-        # print(self._pairing_encoding)
+        """
+        Generate a joint task representation from the sequence and the structure constraints.
+        """
         pair_assignments = {'A': 'U', 'U': 'A', 'G': 'C', 'C': 'G'}
         new_local_target = [site for site in self.dot_bracket.rstrip()]
-        for index, site in enumerate(self.sequence_constraints):    # enumerate(self._env_config.sequence_constraints):
+        for index, site in enumerate(self.sequence_constraints):
             if site != 'N':
                 paired_site = self._pairing_encoding[index]
-                new_local_target[index] = site    # self._env_config.sequence_constraints[index]
+                new_local_target[index] = site
                 if paired_site:
-                    new_local_target[paired_site] = pair_assignments[site]    # pair_assignment[self._env_config.sequence_constraints[index]]
+                    new_local_target[paired_site] = pair_assignments[site]
         return ''.join(new_local_target)
 
     def get_partition(self):
+        """
+        Get the struture domains from the structure constraints and the sequence domains from the sequence constraints.
+        """
         sequence_pattern = re.compile(r"[A, C, G, U]+")
         structure_pattern = re.compile(r"[0, 1, 2]+")
         sequence_parts = []
         structure_parts = []
         current_index = 0
         for pattern in sequence_pattern.findall(self.sequence_constraints):
-            # print(pattern)
             start, end = re.search(pattern, self.sequence_constraints[current_index:]).span()
             sequence_parts.append((start + current_index, end + current_index))
             current_index += end
@@ -511,14 +397,9 @@ class _Target(object):
                     tmp_db[index] = '2'
         tmp_db = ''.join(tmp_db)
         for pattern in structure_pattern.findall(tmp_db):
-            # print(pattern)
-            # print(re.search(pattern, tmp_db[current_index:]).span())
             start, end = re.search(pattern, tmp_db[current_index:]).span()
             structure_parts.append((start + current_index, end + current_index))
-            # print(self.dot_bracket[start + current_index:end + current_index])
             current_index += end
-        # sequence_parts = [re.search(pattern, self.local_target).span() for pattern in sequence_pattern.findall(self.local_target)]  # TODO: fix bug: for small motifs, search finds early mathces, index is not next index....
-        # structure_parts = [(x[1], y[0]) for x, y in zip(sequence_parts, sequence_parts[1:])] if sequence_parts else [(0, len(self.local_target))]
         return sequence_parts, structure_parts
 
     def __len__(self):
@@ -537,10 +418,21 @@ class _Target(object):
         return self._pairing_encoding[site]
 
     def reset(self):
+        """
+        A reset is required because the actual task representation is changed when the state is dependend on the previous action of the agent.
+        """
         self.sequence_progress = self.local_target if self._env_config.local_design else self.dot_bracket
         self.padded_encoding = _encode_dot_bracket(self.dot_bracket, self._env_config) if not self._env_config.local_design else _encode_dot_bracket(self.local_target, self._env_config)
 
     def assign_sites(self, index, value, paired_site):
+        """
+        Assign values to sites of the task, to incorporate the agent's actions into the template for the state representations.
+
+        Args:
+            index: current site to assign a nucleotide to.
+            value: the value to assign.
+            paired_site: bool if site has a known pairing partner.
+        """
         new_local_target = list(self.sequence_progress)
         if paired_site:
             new_local_target[index[0]] = value[0]
@@ -552,6 +444,9 @@ class _Target(object):
 
 
     def reset_counter(self):
+        """
+        Resets the counter of the current site for predictions.
+        """
         self._current_site = 0
         self.structure_parts_encoding = _encode_structure_parts(self.local_target)
         # print(f"target_reset: {self.structure_parts_encoding}")
@@ -636,12 +531,6 @@ class _Design(object):
             self._primary_list[site] = self.action_to_base[action]
             self._last_assignment = (site, self.action_to_base[action], False)
 
-    def replace_subsequences(self, target, keep_sequence):
-        if keep_sequence == 'fully':
-            mutations_and_sites = [(mutation, site) for site, mutation in enumerate(target) if mutation not in ['.', '(', ')']]
-        mutations_and_sites = [(target[site], site) for site, _ in enumerate(self.primary) if _ == '_']
-        return design.get_mutated([x[0] for x in mutations_and_sites], [x[1] for x in mutations_and_sites])
-
     @property
     def last_assignment(self):
         return self._last_assignment
@@ -672,13 +561,25 @@ def _random_epoch_gen(data):
             yield data[i]
 
 def _sorted_data_gen(data):
+    """
+    Generator to get sorted epoch data
+    """
     data = sorted(data, key=lambda x: len(x))
     while True:
         for target in data:
             yield target
 
-
 def hamming_with_n(s1, s2):
+    """
+    Hamming Distance without counting wildcard smbols.
+
+    Args:
+        s1: the first sequence for comparison.
+        s2: the second sequence for comparison.
+
+    Returns:
+        the distance without accounting unrestricted sites.
+    """
     distance = 0
     for c1, c2 in zip(s1, s2):
         if c1 != c2:
@@ -698,13 +599,6 @@ class EpisodeInfo:
     target_id: int
     time: float
     normalized_hamming_distance: float
-    # gc_content: float
-    # agent_gc: float
-    # delta_gc: float
-    # gc_satisfied: bool
-
-
-
 
 class RnaDesignEnvironment(Environment):
     """
@@ -714,7 +608,7 @@ class RnaDesignEnvironment(Environment):
     def __init__(self, dot_brackets, env_config):
         """TODO
         Initialize an environemnt.
-gc control
+
         Args:
             env_config: The configuration of the environment.
         """
@@ -728,10 +622,7 @@ gc control
         self.target = None
         self.design = None
         self._folding = None
-        # print(self._env_config.gc_tolerance, self._env_config.desired_gc)
-        # self._constraint_controller = ConstraintControler(self._env_config.gc_tolerance, self._env_config.desired_gc)
         self.episodes_info = []
-        # print(self._env_config)
 
     def __str__(self):
         return "RnaDesignEnvironment"
@@ -776,8 +667,6 @@ gc control
         Returns:
             The next state.
         """
-        # print('get state')
-        # print(f"get_state: {self.target.structure_parts_encoding}")
         start = self.target.next_structure_site if self._env_config.reward_function == 'structure_only' else self.design.first_unassigned_site
         # print(f"get_state2: {self.target.structure_parts_encoding}")
 
@@ -791,51 +680,44 @@ gc control
         ]
 
     def _get_local_design_loss(self, design):
+        """
+        Get the loss for the sequence parts and the structure part of the candidate solution.
+
+        Args:
+            design: Instance of the Design.
+
+        Returns:
+            distance: the total distance between the design and strutcure and sequence constraints.
+            folding: the secondary structure to not compute this again.
+        """
         distance = 0
         folding = fold(design.primary)[0] if self._env_config.reward_function == 'sequence_and_structure' else None
         sequence_parts, folding_parts = self.target.partition  # get_partition()  # return tuple of <sequence start, sequence end>
-        # print(sequence_parts, folding_parts)
 
         if self._env_config.reward_function == 'sequence_and_structure':
-            # for start, end in sequence_parts:
-            #     distance += hamming(design.primary[start:end], self.target.sequence_constraints[start:end])
             distance += hamming_with_n(design.primary, self.target.sequence_constraints)
         else:
             design = [c for c in design._primary_list]
-            # print(design)
             for index, site in enumerate(self.target.local_target):
                 if site in ['A', 'C', 'G', 'U']:
                     design[index] = site
-            # print(self.target.local_target)
-            # print(design)
             self.design = _Design(primary=[c for c in ''.join(design).rstrip()])
             folding = fold(self.design.primary)[0]
-            # print(f"d: {folding}")
-            # print(f"t: {self.target.dot_bracket}")
 
-
-        # for start, end in folding_parts:
-        #     distance +=  hamming(folding[start:end], self.target.dot_bracket[start:end])
         distance += hamming_with_n(folding, self.target.dot_bracket)
-        # print(f"d: {folding}")
-        # print(f"t: {self.target.dot_bracket}")
-        # if self._env_config.sequence_constraints:
-        #     distance = hamming(folding, self.target.dot_bracket)
-        # print(distance)
-        # print(distance / len(self.target.dot_bracket))
-        # print((1 - (distance / len(self.target.dot_bracket)))**self._env_config.reward_exponent)
+
         return distance, folding
 
 
     def _local_improvement(self, folded_design):
         """
         Compute Hamming distance of locally improved candidate solutions.
+
         Returns:
             The minimum Hamming distance of all imporved candidate solutions.
         """
         def flatten_list(list_):
             return [item for sublist in list_ for item in sublist]
-
 
         if self._env_config.local_design:
             sequence_parts, structure_parts = self.target.partition
@@ -867,7 +749,6 @@ gc control
         for mutation in product("AGCU", repeat=len(differing_sites)):
             mutated = self.design.get_mutated(mutation, differing_sites)
             folded_mutated, _ = fold(mutated.primary)
-            print(folded_mutated)
             if self._env_config.local_design:
                 hamming_distance, _ = self._get_local_design_loss(mutated)
             else:
@@ -878,6 +759,12 @@ gc control
         return min(hamming_distances)
 
     def reward_local_design(self):
+        """
+        Reward implementation for partial RNA design.
+
+        Returns:
+            The reward.
+        """
         distance, self._folding = self._get_local_design_loss(self.design)
 
         if distance == 0:
@@ -913,8 +800,6 @@ gc control
         if not terminal:
             return 0
 
-
-        # reward formulation for RNA local Design, excluding local improvement steps and gc content!!!!
         if self._env_config.local_design:
             return self.reward_local_design()
         else:
@@ -955,8 +840,6 @@ gc control
         terminal = self.design.first_unassigned_site is None if not self._env_config.reward_function == 'structure_only' else all([x is None for x in self.target.structure_parts_encoding])
         state = None if terminal else self._get_state()
         reward = self._get_reward(terminal)
-        # print(state)
-        # print(self.design._primary_list)
         return state, terminal, reward
 
     def close(self):

@@ -12,6 +12,9 @@ data/rfam_local_*.tar.gz
 data/test_local_train/
 data/rfam_learn_local_min_100_max_500_test/
 data/rfam_learn_local_min_500_test/
+data/eterna_local_test/
+data/rfam_anta_sc*
+data/rfam_taneda*
 
 
 # thirdparty
@@ -35,6 +38,8 @@ logs/
 # plots
 pgfplots*
 plots*
+other_plots*
+other_pgf*
 
 # misc
 *__pycache__/
@@ -55,3 +60,16 @@ reports/thesis/thesis_main.pdf
 reports/thesis/thesis_main.synctex.gz
 reports/thesis/thesis_main.toc
 reports/thesis/out/thesis_main.*
+**/*.aux
+**/*.auxlock
+**/*.fdb_latexmk
+**/*.fls
+**/*.log
+**/*.out
+**/*.pdf
+
+#verification
+verification/
+
+#misc
+thoughts.txt

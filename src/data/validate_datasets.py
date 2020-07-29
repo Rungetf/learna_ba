@@ -1,6 +1,6 @@
 from pathlib import Path
 
-datasets = ['rfam_local_test', 'rfam_local_validation', 'rfam_local_train', 'rfam_local_min_400_max_1000_test', 'rfam_local_min_1000_test', 'rfam_local_short_train', 'rfam_local_long_train']
+datasets = ['rfam_local_test', 'rfam_local_validation', 'rfam_local_train', 'rfam_local_min_400_max_1000_test', 'rfam_local_min_1000_test', 'rfam_local_short_train', 'rfam_local_long_train', 'rfam_learn_local_min_500_test', 'rfam_learn_local_min_100_max_500_test']
 
 def get_dataset(data_dir, dataset):
     return Path(data_dir, dataset).glob('*.rna')

@@ -83,7 +83,7 @@ if args.mode == "meta_learna":
     worker_args = dict(
         data_dir=args.data_dir,
         num_cores=args.n_cores,
-        train_sequences=range(1, 100000),
+        train_sequences=range(1, 100),
         validation_timeout=60,
     )
 

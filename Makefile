@@ -74,11 +74,19 @@ rfam-interim:
 
 rfam-local-dataset:
 	@source activate learna && \
-	python -m src.data.generate_rfam_dataset --unique --name rfam_local_long --minimum_length 200 --size 100 --train_multiplier 1000 --validation_multiplier 1 --local_random --motifs
+	python -m src.data.generate_rfam_dataset --unique --name rfam_local_long --size 100 --train_multiplier 1000 --validation_multiplier 1 --local_random --motifs
+
+rfam-rna-design-local:
+	@source activate learna && \
+  python -m src.data.generate_rfam_taneda_local
 
 split-local-data:
 	@source activate learna && \
 	python -m src.data.interim_to_single_files
+
+validate-taneda-output:
+	@source activate learna && \
+	python -m src.analyse.validate_output
 
 
 ## Download and prepare all datasets
@@ -137,97 +145,92 @@ thirdparty-requirements:
 experiment-test:
 	@source activate learna && \
 	python -m src.learna.design_rna \
-	--dataset 'rfam_local_validation' \
+	--agent random \
+	--dataset 'test/test' \
 	--data_dir 'data' \
-	--target_structure_path 'data/12.rna' \
+	--target_structure_path 'data/riboswitch_design.rna' \
 	--mutation_threshold 5 \
-	--batch_size 75 \
+	--batch_size 196 \
 	--conv_sizes 0 0 \
-	--conv_channels 8 23 \
+	--conv_channels 3 4 \
 	--embedding_size 7 \
-	--entropy_regularization 0.0062538752481115885 \
-	--fc_units 47 \
-	--learning_rate 0.0007629922155340233 \
-	--lstm_units 10 \
+	--entropy_regularization 0.000528063083283936 \
+	--fc_units 26 \
+	--learning_rate 0.000384121783602744 \
+	--lstm_units 8 \
 	--num_fc_layers 1 \
 	--num_lstm_layers 0 \
-	--reward_exponent 7.077835098205039 \
-	--state_radius 23 \
-	--reward_function "sequence_and_structure" \
+	--reward_exponent 11.454339469173966 \
+	--state_radius 0 \
+	--reward_function "structure_only" \
 	--local_design \
 	--state_representation "n-gram" \
 	--predict_pairs \
 	--data_type "random"
+
 	# --restart_timeout 1800
-	# --predict_pairs
-
-
-## Local Meta-LEARNA experiment with GC-control
-meta-learna-test:
-	mkdir -p ../../test_results/eterna/Meta-LEARNA/run-plot/
-	@source activate learna && \
-	python -m src.learna.design_rna \
-	--mutation_threshold 5 \
-	--batch_size 123 \
-	--conv_sizes 11 3 \
-	--conv_channels 10 3 \
-	--embedding_size 2 \
-	--entropy_regularization 0.00015087352506343337 \
-	--fc_units 52 \
-	--learning_rate 6.442010833400271e-05 \
-	--lstm_units 3 \
-	--num_fc_layers 1 \
-	--num_lstm_layers 0 \
-	--reward_exponent 8.932893783628236 \
-	--state_radius 29 \
-	--dataset rfam_local_test \
-	--data_dir data \
-	--local_design \
-	--structure_only \
-	--target_structure_ids 1 \
-	--restore_path models/ICLR_2019/224_0_1 \
-	--stop_learning
-	# --predict_pairs \
-	# --timeout 1800 \
-	# > ../../test_results/eterna/Meta-LEARNA/run-plot/2_plot_run_gc_01.out
 
 
 ## Local Meta-LEARNA experiment with GC-control
 meta-learna-adapt-test:
-	mkdir -p ../../test_results/eterna/Meta-LEARNA-Adapt/run-plot/
 	@source activate learna && \
 	python -m src.learna.design_rna \
+	--target_structure_path data/riboswitch_design.rna \
 	--mutation_threshold 5 \
-	--batch_size 123 \
-	--conv_sizes 11 3 \
-	--conv_channels 10 3 \
+  --batch_size 95 \
+  --conv_channels 23 2 \
+  --conv_sizes 7 0 \
+  --data_type "random" \
+  --embedding_size 1 \
+  --entropy_regularization 0.002846838967807086 \
+  --fc_units 61 \
+  --learning_rate 0.00035728046577710495 \
+  --lstm_units 3 \
+  --num_fc_layers 2 \
+  --num_lstm_layers 0 \
+  --predict_pairs \
+  --reward_exponent 10.78740103642566 \
+  --reward_function "structure_only" \
+  --state_radius 22 \
+  --state_representation "sequence_progress" \
+  --local_design \
+  --restore_path models/212_0_0/
+
+meta-learna-test:
+	@source activate learna && \
+	python -m src.learna.design_rna \
+	--target_structure_path data/riboswitch_design.rna \
+	--mutation_threshold 5 \
+	--batch_size 118 \
+	--conv_channels 2 25 \
+	--conv_sizes 0 5 \
+	--data_type "random-sort" \
 	--embedding_size 2 \
-	--entropy_regularization 0.00015087352506343337 \
-	--fc_units 52 \
-	--learning_rate 6.442010833400271e-05 \
-	--lstm_units 3 \
+	--entropy_regularization 7.990216536104802e-05 \
+	--fc_units 49 \
+	--learning_rate 0.000854036796946988 \
+	--lstm_units 1 \
 	--num_fc_layers 1 \
 	--num_lstm_layers 0 \
-	--reward_exponent 8.932893783628236 \
-	--state_radius 29 \
-	--gc_improvement_step \
-	--gc_reward \
-	--desired_gc 0.1 \
-	--gc_weight 1 \
-	--gc_tolerance 0.01 \
-	--target_structure_path data/eterna/2.rna \
-	--restore_path models/ICLR_2019/224_0_1 \
-	--restart_timeout 1800 > ../../test_results/eterna/Meta-LEARNA-Adapt/run-plot/2_plot_run_gc_01.out
+	--predict_pairs \
+	--reward_exponent 10.892910865085273 \
+	--reward_function "structure_only" \
+	--state_radius 24 \
+	--state_representation "sequence_progress" \
+	--local_design \
+	--restore_path models/471_0_8/
+	--stop_learning
+
 
 test-timed-execution-%:
 	@source activate learna && \
 	python utils/timed_execution.py \
-		--timeout 3600 \
+		--timeout 600 \
 		--data_dir data/ \
 		--results_dir results/ \
-		--experiment_group test_anta_local \
-		--method 6576532_482_0_0_frainet \
-		--dataset rfam_local_test \
+		--experiment_group rna_local_design_new_interface \
+		--method 7031046_330_0_3 \
+		--dataset rfam_local_test_anta \
 		--task_id $*
 
 ################################################################################
@@ -298,18 +301,27 @@ bohb-example:
 ################################################################################
 # Analysis and Visualization
 ################################################################################
+tables-%:
+	@source activate learna && \
+	python -m src.analyse.tables --experiment_group $* --results_dir tables/ --column_format "|c|c|c|c|c|c|c|c|c|" --compile_ready
+
+
 validate-datasets:
 	@source activate learna && \
 	python -m src.data.validate_datasets --data_dir data
 
 get-state-radius:
 	@source activate learna && \
-	python utils/get_state_radius.py --conv1 0 --conv2 3 --state_rel 0.3433192641967252
+	python utils/get_state_radius.py --conv1 3 --conv2 0 --state_rel 0.4834547442899088
 
 analyse-datasets:
 	@source activate learna && \
 	python -m src.analyse.analyse_datasets
 
+verify:
+	# rm -rf verification/rna_local_design_verify/*
+	@source activate learna && \
+	python -m src.analyse.verify_results
 
 
 ## Analyse experiment group %
@@ -339,7 +351,7 @@ analyse-output-test:
 ## Analyse Bohb runs
 analyse-bohb-%:
 	@source activate analysis && \
-	python -m src.analyse.analyse_bohb_results --run $* --out_dir results/fanova_test --mode 4 --n 5
+	python -m src.analyse.analyse_bohb_results --run $* --out_dir results/fanova/$* --mode autoMeta-LEARNA --n 5 --parameter reward_function
 
 
 generate-bohb-plotting-data-%:
@@ -367,6 +379,24 @@ plots-%:
 final-plots:
 	rm -f pgfplots/*
 	pdflatex -synctex=1 -interaction=nonstopmode -shell-escape pgfplots.tex
+
+other-plots:
+	mkdir -p other_plots
+	pdflatex -synctex=1 -interaction=nonstopmode -shell-escape other_pgf_plots.tex
+
+
+## Plot gc-control data
+performance-plots:
+	rm -f pgfplots_performance/*
+	pdflatex -synctex=1 -interaction=nonstopmode -shell-escape pgfplots_performance.tex
+
+write_config_space:
+	@source activate learna && \
+	python -m src.analyse.write_config_space
+
+analyse-evaluations:
+	@source activate learna && \
+	python -m src.analyse.analyse_number_of_evaluations --experiment_group results/partial_rna_design/ --methods 7052569_471_0_8 7052570_212_0_0 7052571_188_0_3 --data_dir data --out_dir analysis
 
 
 ################################################################################

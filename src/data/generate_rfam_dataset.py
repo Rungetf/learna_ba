@@ -292,6 +292,7 @@ if __name__ == '__main__':
             dfs.append(tsv_to_df(path))
 
     df = pd.concat(dfs)
+    print(f"whole data : {df['sequence'].size}")
 
     # remove structures that aren't in the chosen length interval
     if args.maximum_length or args.minimum_length:
@@ -308,31 +309,33 @@ if __name__ == '__main__':
         print("Use unique structures only")
         df = remove_duplicates(df)
 
-    print('Validate data')
-    assert validate_structure_length(df)
-    df = drop_bad_sequences(df)
+    print(f"Unique structures: {df['sequence'].size}")
 
-    print('Generate datasets')
-    print(f"test set size: {args.size}")
-    print(f"training set size: {args.size * args.train_multiplier}")
-    print(f"validation set size: {args.size * args.validation_multiplier}")
-    datasets = generate_datasets(df, args.size, args.train_multiplier, args.validation_multiplier)
-    iteration = 0
-    while not validate_datasets(datasets):
-        iteration += 1
-        print(f"datasets not valid in iteration {iteration}")
-        datasets = generate_datasets(df, args.size, args.train_multiplier, args.validation_multiplier)
+    # print('Validate data')
+    # assert validate_structure_length(df)
+    # df = drop_bad_sequences(df)
 
-    # generate randomly generated local design structures if desired
-    if args.local_random:
-        print("Generate random structures for local design")
-        datasets = [generate_local_random(dataset, args.maximum_replacements, args.replace_quantile, args.suffix_size) for dataset in datasets]
+    # print('Generate datasets')
+    # print(f"test set size: {args.size}")
+    # print(f"training set size: {args.size * args.train_multiplier}")
+    # print(f"validation set size: {args.size * args.validation_multiplier}")
+    # datasets = generate_datasets(df, args.size, args.train_multiplier, args.validation_multiplier)
+    # iteration = 0
+    # while not validate_datasets(datasets):
+    #     iteration += 1
+    #     print(f"datasets not valid in iteration {iteration}")
+    #     datasets = generate_datasets(df, args.size, args.train_multiplier, args.validation_multiplier)
 
-    if args.motifs:
-        # extract motifs from structures and generate local data by inserting structural motifs into sequence
-        print('Generate motif based structures for local design ')
-        datasets = [generate_local_motif_based(extract_motifs(dataset)) for dataset in datasets]
+    # # generate randomly generated local design structures if desired
+    # if args.local_random:
+    #     print("Generate random structures for local design")
+    #     datasets = [generate_local_random(dataset, args.maximum_replacements, args.replace_quantile, args.suffix_size) for dataset in datasets]
 
-    print(f"Write data to {args.out_dir}")
-    name = args.name if args.name else 'rfam_learn_local'
-    datasets_to_tsv(datasets, args.out_dir, name=name, args=args)
+    # if args.motifs:
+    #     # extract motifs from structures and generate local data by inserting structural motifs into sequence
+    #     print('Generate motif based structures for local design ')
+    #     datasets = [generate_local_motif_based(extract_motifs(dataset)) for dataset in datasets]
+
+    # print(f"Write data to {args.out_dir}")
+    # name = args.name if args.name else 'rfam_learn_local'
+    # datasets_to_tsv(datasets, args.out_dir, name=name, args=args)

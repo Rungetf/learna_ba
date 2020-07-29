@@ -1,0 +1,104 @@
+autoLEARNA: (7052571)
+=====================
+
+[1]
+(69, (188, 0, 3), {'batch_size': 196, 'conv_channels1': 3, 'conv_channels2': 4, 'conv_radius1': 0, 'conv_radius2': 0, 'data_type': 'random', 'embedding_size': 7, 'entropy_regularization': 0.000528063083283936, 'fc_units': 26, 'learning_rate': 0.000384121783602744, 'lstm_units': 8, 'num_fc_layers': 1, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 11.454339469173966, 'reward_function': 'structure_only', 'state_radius_relative': 0.05554233029992539, 'state_representation': 'n-gram'})
+
+[2]
+(68, (166, 0, 5), {'batch_size': 140, 'conv_channels1': 1, 'conv_channels2': 18, 'conv_radius1': 0, 'conv_radius2': 0, 'data_type': 'random-sort', 'embedding_size': 7, 'entropy_regularization': 0.0030736701629483403, 'fc_units': 15, 'learning_rate': 0.0006740235043735906, 'lstm_units': 34, 'num_fc_layers': 1, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 9.941643694573338, 'reward_function': 'structure_only', 'state_radius_relative': 0.527478889336634, 'state_representation': 'sequence_progress'})
+
+[3]
+(68, (312, 0, 23), {'batch_size': 121, 'conv_channels1': 20, 'conv_channels2': 1, 'conv_radius1': 0, 'conv_radius2': 0, 'data_type': 'random', 'embedding_size': 8, 'entropy_regularization': 0.0014685771735087215, 'fc_units': 63, 'learning_rate': 0.0003392476072485441, 'lstm_units': 6, 'num_fc_layers': 1, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 9.56807997313776, 'reward_function': 'structure_only', 'state_radius_relative': 0.38499719033955127, 'state_representation': 'n-gram'})
+
+[4]
+(68, (361, 0, 5), {'batch_size': 127, 'conv_channels1': 7, 'conv_channels2': 6, 'conv_radius1': 0, 'conv_radius2': 0, 'data_type': 'random-sort', 'embedding_size': 4, 'entropy_regularization': 0.0004670799221815876, 'fc_units': 63, 'learning_rate': 0.0009946134356241436, 'lstm_units': 26, 'num_fc_layers': 1, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 8.092805385268335, 'reward_function': 'structure_only', 'state_radius_relative': 0.02101179063114872, 'state_representation': 'sequence_progress'})
+
+[5]
+(68, (375, 0, 3), {'batch_size': 181, 'conv_channels1': 1, 'conv_channels2': 29, 'conv_radius1': 0, 'conv_radius2': 0, 'data_type': 'random', 'embedding_size': 5, 'entropy_regularization': 0.0021416168311020633, 'fc_units': 55, 'learning_rate': 0.0006112665389173311, 'lstm_units': 2, 'num_fc_layers': 1, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 9.183478376810697, 'reward_function': 'structure_only', 'state_radius_relative': 0.2373255018080781, 'state_representation': 'n-gram'})
+
+[6]
+(67, (149, 0, 5), {'batch_size': 227, 'conv_channels1': 19, 'conv_channels2': 31, 'conv_radius1': 5, 'conv_radius2': 0, 'data_type': 'random', 'embedding_size': 5, 'entropy_regularization': 0.002096383680789648, 'fc_units': 21, 'learning_rate': 0.00038760842089128873, 'lstm_units': 1, 'num_fc_layers': 1, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 11.7544004000764, 'reward_function': 'structure_only', 'state_radius_relative': 0.17637464970990213, 'state_representation': 'n-gram'})
+
+[7]
+(67, (162, 0, 4), {'batch_size': 116, 'conv_channels1': 7, 'conv_channels2': 28, 'conv_radius1': 0, 'conv_radius2': 0, 'data_type': 'random', 'embedding_size': 8, 'entropy_regularization': 0.0009682463249054423, 'fc_units': 18, 'learning_rate': 0.0009592716312158926, 'lstm_units': 31, 'num_fc_layers': 1, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 8.512662704762661, 'reward_function': 'structure_only', 'state_radius_relative': 0.028650245921671647, 'state_representation': 'n-gram'})
+
+[8]
+(67, (182, 0, 4), {'batch_size': 224, 'conv_channels1': 21, 'conv_channels2': 2, 'conv_radius1': 0, 'conv_radius2': 0, 'data_type': 'random-sort', 'embedding_size': 8, 'entropy_regularization': 0.001188755624420176, 'fc_units': 62, 'learning_rate': 0.0005953323890108298, 'lstm_units': 7, 'num_fc_layers': 1, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 10.018939227238372, 'reward_function': 'structure_only', 'state_radius_relative': 0.11762291762407845, 'state_representation': 'n-gram'})
+
+[9]
+(67, (244, 0, 25), {'batch_size': 156, 'conv_channels1': 1, 'conv_channels2': 4, 'conv_radius1': 0, 'conv_radius2': 0, 'data_type': 'random-sort', 'embedding_size': 6, 'entropy_regularization': 0.00019758166542004795, 'fc_units': 19, 'learning_rate': 0.0005578929470702535, 'lstm_units': 11, 'num_fc_layers': 1, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 11.695198654152648, 'reward_function': 'structure_only', 'state_radius_relative': 0.7274135885053682, 'state_representation': 'n-gram'})
+
+[10]
+(67, (300, 0, 21), {'batch_size': 92, 'conv_channels1': 31, 'conv_channels2': 19, 'conv_radius1': 0, 'conv_radius2': 0, 'data_type': 'random', 'embedding_size': 5, 'entropy_regularization': 0.001569477949068731, 'fc_units': 30, 'learning_rate': 0.0009112198318764886, 'lstm_units': 40, 'num_fc_layers': 2, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 11.793684025842623, 'reward_function': 'structure_only', 'state_radius_relative': 0.08565886299940449, 'state_representation': 'sequence_progress'})
+
+
+
+
+autoMeta-LEARNA: (7052569)
+==========================
+
+[1]
+(50, (471, 0, 8), {'batch_size': 118, 'conv_channels1': 2, 'conv_channels2': 25, 'conv_radius1': 0, 'conv_radius2': 2, 'data_type': 'random-sort', 'embedding_size': 2, 'entropy_regularization': 7.990216536104802e-05, 'fc_units': 49, 'learning_rate': 0.000854036796946988, 'lstm_units': 1, 'num_fc_layers': 1, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 10.892910865085273, 'reward_function': 'structure_only', 'state_radius_relative': 0.6740126009119931, 'state_representation': 'sequence_progress', 'trainingset': 'rfam_local_short_train'})
+
+[2]
+(45, (129, 0, 6), {'batch_size': 102, 'conv_channels1': 2, 'conv_channels2': 3, 'conv_radius1': 0, 'conv_radius2': 2, 'data_type': 'random-sort', 'embedding_size': 3, 'entropy_regularization': 1.2674495934425218e-05, 'fc_units': 58, 'learning_rate': 0.0004290724818010347, 'lstm_units': 4, 'num_fc_layers': 2, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 4.390539942903926, 'reward_function': 'structure_only', 'state_radius_relative': 0.5665202087723675, 'state_representation': 'n-gram', 'trainingset': 'rfam_local_short_train'})
+
+[3]
+(44, (132, 0, 6), {'batch_size': 203, 'conv_channels1': 9, 'conv_channels2': 1, 'conv_radius1': 0, 'conv_radius2': 1, 'data_type': 'random-sort', 'embedding_size': 1, 'entropy_regularization': 2.939422988515321e-05, 'fc_units': 31, 'learning_rate': 0.0005976341203743034, 'lstm_units': 1, 'num_fc_layers': 1, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 11.142058213584045, 'reward_function': 'structure_only', 'state_radius_relative': 0.05330529535630735, 'state_representation': 'sequence_progress', 'trainingset': 'rfam_local_short_train'})
+
+[4]
+(43, (417, 0, 1), {'batch_size': 173, 'conv_channels1': 14, 'conv_channels2': 27, 'conv_radius1': 0, 'conv_radius2': 2, 'data_type': 'random', 'embedding_size': 6, 'entropy_regularization': 0.0006948630429073706, 'fc_units': 19, 'learning_rate': 0.0006671433870569173, 'lstm_units': 5, 'num_fc_layers': 1, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 10.899881392554075, 'reward_function': 'structure_only', 'state_radius_relative': 0.9435790563413045, 'state_representation': 'n-gram', 'trainingset': 'rfam_local_short_train'})
+
+[5]
+(39, (308, 0, 2), {'batch_size': 222, 'conv_channels1': 16, 'conv_channels2': 2, 'conv_radius1': 3, 'conv_radius2': 1, 'data_type': 'random-sort', 'embedding_size': 6, 'entropy_regularization': 5.400995955421495e-07, 'fc_units': 18, 'learning_rate': 0.0005417858903487547, 'lstm_units': 1, 'num_fc_layers': 2, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 11.076844127316024, 'reward_function': 'structure_only', 'state_radius_relative': 0.2902229047336983, 'state_representation': 'sequence_progress', 'trainingset': 'rfam_local_short_train'})
+
+[6]
+(37, (254, 0, 1), {'batch_size': 73, 'conv_channels1': 2, 'conv_channels2': 23, 'conv_radius1': 3, 'conv_radius2': 0, 'data_type': 'random-sort', 'embedding_size': 5, 'entropy_regularization': 2.556058752125514e-07, 'fc_units': 21, 'learning_rate': 0.00048704486537675453, 'lstm_units': 1, 'num_fc_layers': 1, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 5.288803946004178, 'reward_function': 'structure_replace_sequence', 'state_radius_relative': 0.14604481182683748, 'state_representation': 'sequence_progress', 'trainingset': 'rfam_local_short_train'})
+
+[7]
+(37, (417, 0, 1), {'batch_size': 173, 'conv_channels1': 14, 'conv_channels2': 27, 'conv_radius1': 0, 'conv_radius2': 2, 'data_type': 'random', 'embedding_size': 6, 'entropy_regularization': 0.0006948630429073706, 'fc_units': 19, 'learning_rate': 0.0006671433870569173, 'lstm_units': 5, 'num_fc_layers': 1, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 10.899881392554075, 'reward_function': 'structure_only', 'state_radius_relative': 0.9435790563413045, 'state_representation': 'n-gram', 'trainingset': 'rfam_local_short_train'})
+
+[8]
+(36, (478, 0, 0), {'batch_size': 138, 'conv_channels1': 2, 'conv_channels2': 27, 'conv_radius1': 0, 'conv_radius2': 2, 'data_type': 'random', 'embedding_size': 5, 'entropy_regularization': 0.00014468805328986888, 'fc_units': 17, 'learning_rate': 0.00035746698904650043, 'lstm_units': 31, 'num_fc_layers': 1, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 11.49126516327711, 'reward_function': 'structure_only', 'state_radius_relative': 0.5236580935755786, 'state_representation': 'n-gram', 'trainingset': 'rfam_local_train'})
+
+[9]
+(35, (150, 0, 7), {'batch_size': 66, 'conv_channels1': 25, 'conv_channels2': 2, 'conv_radius1': 1, 'conv_radius2': 0, 'data_type': 'random-sort', 'embedding_size': 5, 'entropy_regularization': 0.0015641861949129098, 'fc_units': 17, 'learning_rate': 0.0005601390566244937, 'lstm_units': 27, 'num_fc_layers': 2, 'num_lstm_layers': 1, 'predict_pairs': 1, 'reward_exponent': 5.379841505379796, 'reward_function': 'structure_only', 'state_radius_relative': 0.3735298719277336, 'state_representation': 'n-gram', 'trainingset': 'rfam_local_short_train'})
+
+[10]
+(33, (216, 0, 6), {'batch_size': 49, 'conv_channels1': 26, 'conv_channels2': 4, 'conv_radius1': 1, 'conv_radius2': 1, 'data_type': 'random-sort', 'embedding_size': 1, 'entropy_regularization': 2.9375645862011932e-05, 'fc_units': 51, 'learning_rate': 0.0006806759971287506, 'lstm_units': 4, 'num_fc_layers': 1, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 7.26891782992966, 'reward_function': 'structure_only', 'state_radius_relative': 0.3802510376200013, 'state_representation': 'sequence_progress', 'trainingset': 'rfam_local_short_train'})
+
+
+
+
+autoMeta-LEARNA-Adapt: (7052570)
+================================
+
+[1]
+(48, (212, 0, 0), {'batch_size': 95, 'conv_channels1': 23, 'conv_channels2': 2, 'conv_radius1': 3, 'conv_radius2': 0, 'data_type': 'random', 'embedding_size': 1, 'entropy_regularization': 0.002846838967807086, 'fc_units': 61, 'learning_rate': 0.00035728046577710495, 'lstm_units': 3, 'num_fc_layers': 2, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 10.78740103642566, 'reward_function': 'structure_only', 'state_radius_relative': 0.4834547442899088, 'state_representation': 'sequence_progress', 'trainingset': 'rfam_local_short_train'})
+
+[2]
+(46, (91, 0, 0), {'batch_size': 60, 'conv_channels1': 19, 'conv_channels2': 16, 'conv_radius1': 2, 'conv_radius2': 4, 'data_type': 'random-sort', 'embedding_size': 5, 'entropy_regularization': 1.3426293920365984e-06, 'fc_units': 22, 'learning_rate': 0.0008374413561994829, 'lstm_units': 21, 'num_fc_layers': 2, 'num_lstm_layers': 1, 'predict_pairs': 1, 'reward_exponent': 7.876858295887719, 'reward_function': 'structure_only', 'state_radius_relative': 0.1800485708092433, 'state_representation': 'sequence_progress', 'trainingset': 'rfam_local_short_train'})
+
+[3]
+(45, (489, 0, 4), {'batch_size': 252, 'conv_channels1': 22, 'conv_channels2': 4, 'conv_radius1': 1, 'conv_radius2': 2, 'data_type': 'random-sort', 'embedding_size': 8, 'entropy_regularization': 8.713964183706628e-06, 'fc_units': 28, 'learning_rate': 0.0006818852135582746, 'lstm_units': 7, 'num_fc_layers': 2, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 6.5022584800814, 'reward_function': 'structure_only', 'state_radius_relative': 0.20524092524197204, 'state_representation': 'n-gram', 'trainingset': 'rfam_local_short_train'})
+
+[4]
+(43, (156, 0, 3), {'batch_size': 129, 'conv_channels1': 6, 'conv_channels2': 10, 'conv_radius1': 0, 'conv_radius2': 2, 'data_type': 'random-sort', 'embedding_size': 5, 'entropy_regularization': 0.001698189700131349, 'fc_units': 38, 'learning_rate': 0.0005399831561675412, 'lstm_units': 43, 'num_fc_layers': 2, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 8.414917442035161, 'reward_function': 'structure_only', 'state_radius_relative': 0.35258845169565645, 'state_representation': 'n-gram', 'trainingset': 'rfam_local_short_train'})
+
+[5]
+(43, (353, 0, 0), {'batch_size': 37, 'conv_channels1': 5, 'conv_channels2': 1, 'conv_radius1': 1, 'conv_radius2': 4, 'data_type': 'random-sort', 'embedding_size': 8, 'entropy_regularization': 0.0001977790656525129, 'fc_units': 29, 'learning_rate': 0.0005234721460539531, 'lstm_units': 2, 'num_fc_layers': 1, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 11.424959268679011, 'reward_function': 'structure_only', 'state_radius_relative': 0.23351482079862665, 'state_representation': 'n-gram', 'trainingset': 'rfam_local_short_train'})
+
+[6]
+(43, (462, 0, 4), {'batch_size': 82, 'conv_channels1': 5, 'conv_channels2': 3, 'conv_radius1': 2, 'conv_radius2': 0, 'data_type': 'random', 'embedding_size': 6, 'entropy_regularization': 3.453459176230383e-05, 'fc_units': 15, 'learning_rate': 0.00045973438023624185, 'lstm_units': 17, 'num_fc_layers': 2, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 7.14630266336211, 'reward_function': 'structure_only', 'state_radius_relative': 0.5621488777428477, 'state_representation': 'n-gram', 'trainingset': 'rfam_local_short_train'})
+
+[7]
+(43, (511, 0, 2), {'batch_size': 93, 'conv_channels1': 2, 'conv_channels2': 16, 'conv_radius1': 1, 'conv_radius2': 0, 'data_type': 'random', 'embedding_size': 3, 'entropy_regularization': 0.00011809692314775477, 'fc_units': 9, 'learning_rate': 0.0008233850846574531, 'lstm_units': 1, 'num_fc_layers': 2, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 6.417383838295349, 'reward_function': 'structure_only', 'state_radius_relative': 0.6841846907076932, 'state_representation': 'n-gram', 'trainingset': 'rfam_local_short_train'})
+
+[8]
+(42, (408, 0, 5), {'batch_size': 89, 'conv_channels1': 2, 'conv_channels2': 3, 'conv_radius1': 2, 'conv_radius2': 0, 'data_type': 'random', 'embedding_size': 4, 'entropy_regularization': 1.1608408184385833e-05, 'fc_units': 57, 'learning_rate': 0.0008959399193844708, 'lstm_units': 44, 'num_fc_layers': 1, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 8.296645168393518, 'reward_function': 'structure_only', 'state_radius_relative': 0.2555984935675303, 'state_representation': 'sequence_progress', 'trainingset': 'rfam_local_train'})
+
+[9]
+(42, (437, 0, 2), {'batch_size': 77, 'conv_channels1': 31, 'conv_channels2': 7, 'conv_radius1': 3, 'conv_radius2': 4, 'data_type': 'random-sort', 'embedding_size': 2, 'entropy_regularization': 0.001499129310403489, 'fc_units': 13, 'learning_rate': 0.0006656804007110748, 'lstm_units': 24, 'num_fc_layers': 1, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 9.468605461117985, 'reward_function': 'structure_only', 'state_radius_relative': 0.6577907907868933, 'state_representation': 'n-gram', 'trainingset': 'rfam_local_short_train'})
+
+[10]
+(42, (452, 0, 1), {'batch_size': 162, 'conv_channels1': 1, 'conv_channels2': 3, 'conv_radius1': 2, 'conv_radius2': 3, 'data_type': 'random', 'embedding_size': 7, 'entropy_regularization': 5.4405881099138256e-05, 'fc_units': 47, 'learning_rate': 0.0004232568972031645, 'lstm_units': 7, 'num_fc_layers': 1, 'num_lstm_layers': 0, 'predict_pairs': 1, 'reward_exponent': 10.973382218465089, 'reward_function': 'structure_only', 'state_radius_relative': 0.4311672478690321, 'state_representation': 'n-gram', 'trainingset': 'rfam_local_short_train'})
