@@ -32,7 +32,7 @@ clean-data:
 clean-models:
 	rm -rf models/example
 
-## Clean results directory
+## Remove results directory
 clean-results:
 	rm -rf results/
 
