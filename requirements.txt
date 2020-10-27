@@ -10,7 +10,7 @@ cffi==1.12.3
 chardet==3.0.4
 Click==7.0
 ConfigSpace==0.4.11
-cryptography==2.7
+cryptography==3.2
 cycler==0.10.0
 Cython==0.29.13
 dataclasses==0.6
