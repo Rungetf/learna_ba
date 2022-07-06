@@ -19,7 +19,7 @@ docutils==0.14
 enum34==1.1.6
 fanova==2.0.13
 hpbandster==0.7.4
-html5lib==0.9999999
+html5lib==0.999999999
 idna==2.8
 importlib-metadata==0.23
 isort==4.3.21
